@@ -1,5 +1,7 @@
 import React from 'react';
 import { Phone, Email, GitHub, LinkedIn, Facebook, Instagram } from '@mui/icons-material';
+
+
 import '../componentStyles/Footer.css';
 
 function Footer() {
@@ -29,6 +31,9 @@ function Footer() {
                         <a href="https://www.instagram.com/tsorilucky/" target="_blank" rel="noopener noreferrer">
                             <Instagram className='social-icon' />
                         </a>
+                        {/* <a href="https://wa.me/254792491368" target="_blank" rel="noopener noreferrer">
+                            <FaWhatsapp />
+                        </a> */}
                     </div>
                 </div>
 

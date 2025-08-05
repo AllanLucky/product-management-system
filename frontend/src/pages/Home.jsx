@@ -15,7 +15,7 @@ function Home() {
     const dispatch = useDispatch();
 
     useEffect(() => {
-        dispatch(getProduct({keyword: ''})); // Fetch all products on home page load
+        dispatch(getProduct({ keyword: "" })); // Fetch all products on home page load
     }, [dispatch]);
 
     useEffect(() => {
