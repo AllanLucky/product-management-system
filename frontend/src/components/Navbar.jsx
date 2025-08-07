@@ -12,7 +12,7 @@ function Navbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
-    const isAuthenticated = true; // Ideally from global state (e.g., Redux or Context)
+    const isAuthenticated = false; // Ideally from global state (e.g., Redux or Context)
     const cartCount = 6; // Replace with dynamic logic later
 
     const navigate = useNavigate();
@@ -23,7 +23,7 @@ function Navbar() {
     const handleSearchSubmit = (e) => {
         e.preventDefault();
         if (searchQuery.trim()) {
-           navigate(`/products?keyword=${encodeURIComponent(searchQuery.trim())}`);
+            navigate(`/products?keyword=${encodeURIComponent(searchQuery.trim())}`);
         } else {
             navigate('/products'); // Redirect to products page if search is empty
         }

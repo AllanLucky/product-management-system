@@ -62,6 +62,12 @@
   gap: 0.5rem;
 }
 
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
 .navbar-icons {
   display: flex;
   align-items: center;

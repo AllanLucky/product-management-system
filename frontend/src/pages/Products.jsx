@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import '../pageStyles/Products.css';
 import PageTitle from '../components/PageTitle';
 import Navbar from '../components/Navbar';
@@ -8,20 +8,27 @@ import { getProduct, removeErrors } from '../features/products/productSlice';
 import Product from '../components/Product';
 import { toast } from 'react-toastify';
 import Loader from '../components/Loader';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import NoProducts from '../components/NoProducts';
+import Pagination from '../components/Pagination';
 
 function Products() {
-  const { loading, products = [], error } = useSelector((state) => state.product);
+  const { loading, error, products, resultPerPage, productCount, totalPages } = useSelector((state) => state.product);
   const dispatch = useDispatch();
   const location = useLocation();
 
   const searchParam = new URLSearchParams(location.search);
-  const keyword = searchParam.get('keyword');
+  const category = searchParam.get("category");
+  const keyword = searchParam.get("keyword");
+  const pageFromURL = parseInt(searchParam.get('page'), 10) || 1;
+  const [currentPage, setCurrentPage] = useState(pageFromURL);
+  const navigate = useNavigate();
+
+  const categories = ["laptop", "mobile", "watch", "tvs", "headphone", "tablet"];
 
   useEffect(() => {
-    dispatch(getProduct({ keyword }));
-  }, [dispatch, keyword]);
+    dispatch(getProduct({ keyword, page: currentPage, category }));
+  }, [dispatch, keyword, currentPage, category]);
 
   useEffect(() => {
     if (error && error !== 'No products found') {
@@ -33,6 +40,30 @@ function Products() {
     }
   }, [dispatch, error]);
 
+  const handlePageChange = (page) => {
+    if (page !== currentPage) {
+      setCurrentPage(page);
+      const newSearchParams = new URLSearchParams(location.search);
+      if (page === 1) {
+        newSearchParams.delete('page');
+      } else {
+        newSearchParams.set('page', page);
+      }
+      navigate(`?${newSearchParams.toString()}`);
+    }
+  };
+
+  const handleCategoryClick = (category) => {
+    const newSearchParams = new URLSearchParams(location.search);
+    if (category) {
+      newSearchParams.set('category', category);
+    } else {
+      newSearchParams.delete('category');
+    }
+    newSearchParams.set('page', 1); // Reset to first page when changing category
+    navigate(`?${newSearchParams.toString()}`);
+  };
+
   return loading ? (
     <Loader />
   ) : (
@@ -43,17 +74,35 @@ function Products() {
       <div className="products-layout">
         <div className="filter-section">
           <h3 className="filter-heading">CATEGORIES</h3>
-          {/* Add category filters if needed */}
+          <ul>
+            {categories.map((cat) => (
+              <li
+                key={cat}
+                className={cat === category ? 'active-category' : ''}
+                onClick={() => handleCategoryClick(cat)}
+              >
+                {cat}
+              </li>
+            ))}
+          </ul>
         </div>
 
         <div className="products-section">
-          {products.length > 0 ? (<div className="products-product-container">
-            {products.map((product) => (
-              <Product key={product._id} product={product} />
-            ))}
-          </div>) : (
+          {products.length > 0 ? (
+            <div className="products-product-container">
+              {products.map((product) => (
+                <Product key={product._id} product={product} />
+              ))}
+            </div>
+          ) : (
             <NoProducts keyword={keyword} />
           )}
+
+          <Pagination
+            currentPage={currentPage}
+            onPageChange={handlePageChange}
+            totalpages={totalPages}
+          />
         </div>
       </div>
 
@@ -63,5 +112,4 @@ function Products() {
 }
 
 export default Products;
-
 
