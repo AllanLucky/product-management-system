@@ -4,11 +4,15 @@ import axios from 'axios';
 // ✅ Get All Products
 export const getProduct = createAsyncThunk(
     'product/getProduct',
-    async ({ keyword }, { rejectWithValue }) => {
+    async ({ keyword, page = 1, category }, { rejectWithValue }) => {
         try {
-            const link = keyword
-                ? `/api/v1/products?keyword=${encodeURIComponent(keyword)}`
-                : '/api/v1/products';
+            let link = `/api/v1/products?page=${page}`;
+            if (category) {
+                link += `&category=${encodeURIComponent(category)}`;
+            }
+            if (keyword) {
+                link += `&keyword=${encodeURIComponent(keyword)}`;
+            }
 
             const { data } = await axios.get(link);
             console.log('Product list response:', data);
@@ -18,6 +22,8 @@ export const getProduct = createAsyncThunk(
         }
     }
 );
+
+
 
 // ✅ Get Product Details
 export const getProductDetails = createAsyncThunk(
