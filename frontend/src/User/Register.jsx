@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import '../UserStyles/Form.css';
 import { Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 function Register() {
     const [formData, setFormData] = useState({
@@ -19,11 +20,38 @@ function Register() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        const { name, email, password } = formData;
 
-        
+        // Basic validation
+        if (!name || !email || !password) {
+            toast.error("Please fill out all the required fields", {
+                position: "top-right",
+                autoClose: 3000
+            });
+            return;
+        }
 
-        console.log('Form submitted:', {
-            ...formData,
+        // Create FormData object
+        const myForm = new FormData();
+        myForm.set("name", name);
+        myForm.set("email", email);
+        myForm.set("password", password);
+
+        // Log form values
+        for (let [key, value] of myForm.entries()) {
+            console.log(`${key}: ${value}`);
+        }
+
+        toast.success("Form submitted successfully!", {
+            position: "top-right",
+            autoClose: 3000
+        });
+
+        // Reset form
+        setFormData({
+            name: '',
+            email: '',
+            password: '',
         });
     };
 
@@ -41,19 +69,17 @@ function Register() {
                             name="name"
                             value={formData.name}
                             onChange={handleChange}
-                            required
                         />
                     </div>
 
                     <div className="input-group">
                         <input
-                            type="text"
+                            type="email"
                             className="input-field"
                             placeholder="Email"
                             name="email"
                             value={formData.email}
                             onChange={handleChange}
-                            required
                         />
                     </div>
 
@@ -64,13 +90,14 @@ function Register() {
                             placeholder="Password"
                             name="password"
                             value={formData.password}
-                            onChange={handleChange}
-                            required
+                            onChange={handleChange} // ✅ FIXED
                         />
                     </div>
+
                     <button type="submit" className="authBtn">
                         Sign Up
                     </button>
+
                     <p className="form-links">
                         Already have an account? <Link to="/login">Login</Link>
                     </p>
