@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import '../UserStyles/Form.css';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { registerUser, removeErrors, removeSuccess } from '../features/user/userSlice';
 
 function Register() {
     const [formData, setFormData] = useState({
@@ -9,6 +11,10 @@ function Register() {
         email: '',
         password: '',
     });
+
+    const { success, loading, error } = useSelector((state) => state.user);
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -24,36 +30,32 @@ function Register() {
 
         // Basic validation
         if (!name || !email || !password) {
-            toast.error("Please fill out all the required fields", {
+            toast.error("Please fill out all required fields", {
                 position: "top-right",
                 autoClose: 3000
             });
             return;
         }
 
-        // Create FormData object
-        const myForm = new FormData();
-        myForm.set("name", name);
-        myForm.set("email", email);
-        myForm.set("password", password);
+        dispatch(registerUser(formData));
+    };
 
-        // Log form values
-        for (let [key, value] of myForm.entries()) {
-            console.log(`${key}: ${value}`);
+    useEffect(() => {
+        if (error) {
+            toast.error(error, { position: "top-right", autoClose: 3000 });
+            dispatch(removeErrors());
         }
 
-        toast.success("Form submitted successfully!", {
-            position: "top-right",
-            autoClose: 3000
-        });
-
-        // Reset form
-        setFormData({
-            name: '',
-            email: '',
-            password: '',
-        });
-    };
+        if (success) {
+            toast.success("Registration successful!", {
+                position: "top-right",
+                autoClose: 3000
+            });
+            setFormData({ name: '', email: '', password: '' });
+            dispatch(removeSuccess());
+            navigate('/login');
+        }
+    }, [error, success, dispatch, navigate]);
 
     return (
         <div className="form-container container">
@@ -69,6 +71,7 @@ function Register() {
                             name="name"
                             value={formData.name}
                             onChange={handleChange}
+                            disabled={loading}
                         />
                     </div>
 
@@ -80,6 +83,7 @@ function Register() {
                             name="email"
                             value={formData.email}
                             onChange={handleChange}
+                            disabled={loading}
                         />
                     </div>
 
@@ -90,12 +94,13 @@ function Register() {
                             placeholder="Password"
                             name="password"
                             value={formData.password}
-                            onChange={handleChange} // ✅ FIXED
+                            onChange={handleChange}
+                            disabled={loading}
                         />
                     </div>
 
-                    <button type="submit" className="authBtn">
-                        Sign Up
+                    <button type="submit" className="authBtn" disabled={loading}>
+                        {loading ? "Signing Up..." : "Sign Up"}
                     </button>
 
                     <p className="form-links">
