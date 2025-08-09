@@ -20,11 +20,7 @@ function Register() {
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        const submissionData = new FormData();
-        submissionData.append('name', formData.name);
-        submissionData.append('email', formData.email);
-        submissionData.append('password', formData.password);
-
+        
 
         console.log('Form submitted:', {
             ...formData,
