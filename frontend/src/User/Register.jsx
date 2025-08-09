@@ -1,115 +1,122 @@
-import React, { useState, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import '../UserStyles/Form.css';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react'
+import '../UserStyles/Form.css'
+import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify';
+import { useDispatch, useSelector } from 'react-redux';
 import { registerUser, removeErrors, removeSuccess } from '../features/user/userSlice';
 
 function Register() {
-    const [formData, setFormData] = useState({
-        name: '',
-        email: '',
-        password: '',
-    });
-
-    const { success, loading, error } = useSelector((state) => state.user);
+    const [user, setUser] = useState({ name: "", email: "", password: "" })
+    const [avatar, setAvatar] = useState("");
+    const [avatarPreview, setAvatarPreview] = useState('./images/profile.jpg')
+    const { name, email, password } = user
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData((prevData) => ({
-            ...prevData,
-            [name]: value,
-        }));
-    };
+    const { error, success } = useSelector(state => state.user);
 
-    const handleSubmit = (e) => {
+    const registerData = (e) => {
+        if (e.target.name === "avatar") {
+            const reader = new FileReader();
+            reader.onload = () => {
+                if (reader.readyState === 2) {
+                    setAvatarPreview(reader.result)
+                    setAvatar(reader.result)
+                }
+            }
+            reader.readAsDataURL(e.target.files[0]);
+        } else {
+            setUser({ ...user, [e.target.name]: e.target.value })
+        }
+    }
+
+    const registerSubmit = (e) => {
         e.preventDefault();
-        const { name, email, password } = formData;
-
-        // Basic validation
-        if (!name || !email || !password) {
-            toast.error("Please fill out all required fields", {
+        if (!name || !password || !email) {
+            toast.error('Please fill all the required fields', {
                 position: "top-right",
                 autoClose: 3000
             });
             return;
         }
 
-        dispatch(registerUser(formData));
-    };
+        const myForm = new FormData();
+        myForm.set('name', name)
+        myForm.set('email', email)
+        myForm.set('password', password)
+        myForm.set('avatar', avatar)
+
+        for (let pair of myForm.entries())
+            console.log(pair[0] + '-' + pair[1]);
+
+        dispatch(registerUser(myForm))
+    }
 
     useEffect(() => {
         if (error) {
             toast.error(error, { position: "top-right", autoClose: 3000 });
             dispatch(removeErrors());
         }
+    }, [dispatch, error]);
 
+    useEffect(() => {
         if (success) {
-            toast.success("Registration successful!", {
-                position: "top-right",
-                autoClose: 3000
-            });
-            setFormData({ name: '', email: '', password: '' });
+            toast.success("Registration Successful", { position: "top-right", autoClose: 3000 });
             dispatch(removeSuccess());
-            navigate('/login');
+            navigate("/login");
         }
-    }, [error, success, dispatch, navigate]);
+    }, [dispatch, success, navigate]);
 
     return (
-        <div className="form-container container">
+        <div className='form-container container'>
             <div className="form-content">
-                <form className="form" onSubmit={handleSubmit}>
-                    <h2 className="form-title">Register</h2>
-
+                <form className="form" onSubmit={registerSubmit}>
+                    <h2>Register</h2>
                     <div className="input-group">
                         <input
-                            type="text"
-                            className="input-field"
-                            placeholder="Username"
-                            name="name"
-                            value={formData.name}
-                            onChange={handleChange}
-                            disabled={loading}
+                            type='text'
+                            placeholder='Username'
+                            name='name'
+                            value={name}
+                            onChange={registerData}
                         />
                     </div>
-
                     <div className="input-group">
                         <input
-                            type="email"
-                            className="input-field"
-                            placeholder="Email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleChange}
-                            disabled={loading}
+                            type='email'
+                            placeholder='Email'
+                            name='email'
+                            value={email}
+                            onChange={registerData}
                         />
                     </div>
-
                     <div className="input-group">
                         <input
-                            type="password"
-                            className="input-field"
-                            placeholder="Password"
-                            name="password"
-                            value={formData.password}
-                            onChange={handleChange}
-                            disabled={loading}
+                            type='password'
+                            placeholder='Password'
+                            name='password'
+                            value={password}
+                            onChange={registerData}
                         />
                     </div>
-
-                    <button type="submit" className="authBtn" disabled={loading}>
-                        {loading ? "Signing Up..." : "Sign Up"}
-                    </button>
-
+                    <div className="input-group atavar-group">
+                        <input
+                            type='file'
+                            name='avatar'
+                            className='file-input'
+                            accept='image/*'
+                            onChange={registerData}
+                        />
+                        <img src={avatarPreview} alt="avatar Preview" className='avatar' />
+                    </div>
+                    <button className="authBtn">Sign Up</button>
                     <p className="form-links">
-                        Already have an account? <Link to="/login">Login</Link>
+                        Already have an account?<Link to="/login">Login</Link>
                     </p>
                 </form>
             </div>
         </div>
-    );
+    )
 }
 
-export default Register;
+export default Register

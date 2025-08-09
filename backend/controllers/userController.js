@@ -3,8 +3,9 @@ import HandleError from "../utils/handleError.js";
 import User from "../models/userModel.js";
 import { sendToken } from "../utils/jwtToken.js";
 import { sendEmail } from "../utils/sendEmail.js";
+import { v2 as cloudinary } from 'cloudinary';
 import crypto from 'crypto'
-import { decode } from "punycode";
+    ;
 
 /**
  * @desc    Register a new user
@@ -12,7 +13,12 @@ import { decode } from "punycode";
  * @access  Public
  */
 export const registerUser = handleAsyncError(async (req, res) => {
-    const { name, email, password } = req.body;
+    const { name, email, password, avatar } = req.body;
+    const myCloud = await cloudinary.uploader.upload(avatar, {
+        folder: "avatars",
+        width: 150,
+        crop: "scale"
+    })
 
     if (!name || !email || !password) {
         return res.status(400).json({
@@ -36,8 +42,8 @@ export const registerUser = handleAsyncError(async (req, res) => {
         email,
         password,
         avatar: {
-            public_id: "default_public_id",
-            url: "default_url"
+            public_id: myCloud.public_id,
+            url: myCloud.secure_url,
         }
     });
 
@@ -55,17 +61,14 @@ export const loginUser = handleAsyncError(async (req, res, next) => {
     if (!email || !password) {
         return next(new HandleError("Email and password are required.", 400));
     }
-
     const user = await User.findOne({ email }).select("+password");
     if (!user) {
         return next(new HandleError("Invalid email or password.", 401));
     }
-
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
         return next(new HandleError("Invalid email or password.", 401));
     }
-
     sendToken(user, 200, res);
 });
 
@@ -79,7 +82,6 @@ export const Logout = handleAsyncError(async (req, res, next) => {
         expires: new Date(Date.now()),
         httpOnly: true
     });
-
     res.status(200).json({
         success: true,
         message: "Successfully logged out."
@@ -93,13 +95,10 @@ export const Logout = handleAsyncError(async (req, res, next) => {
  */
 export const requestPasswordReset = handleAsyncError(async (req, res, next) => {
     const user = await User.findOne({ email: req.body.email });
-
     if (!user) {
         return next(new HandleError("User does not exist", 400));
     }
-
     let resetToken;
-
     try {
         resetToken = user.generatePasswordResetToken();
         await user.save({ validateBeforeSave: false });
@@ -116,12 +115,10 @@ export const requestPasswordReset = handleAsyncError(async (req, res, next) => {
             subject: 'Password Reset Request',
             message
         });
-
         res.status(200).json({
             success: true,
             message: `Email is sent to ${user.email} successfully`
         });
-
     } catch (error) {
         user.resetPasswordToken = undefined;
         user.resetPasswordExpire = undefined;
@@ -141,7 +138,6 @@ export const resetPassword = handleAsyncError(async (req, res, next) => {
         .createHash("sha256")
         .update(req.params.token)
         .digest("hex");
-
     const user = await User.findOne({
         resetPasswordToken,
         resetPasswordExpire: { $gt: Date.now() }
@@ -150,14 +146,11 @@ export const resetPassword = handleAsyncError(async (req, res, next) => {
     if (!user) {
         return next(new HandleError("Reset password token is invalid or has been expired", 400))
     }
-
     const { password, confirmPassword } = req.body
 
     if (password !== confirmPassword) {
         return next(new HandleError("Password doesnt match", 400))
     }
-
-
     user.password = password
     user.resetPasswordToken = undefined;
     user.resetPasswordExpire = undefined;
@@ -180,23 +173,18 @@ export const getUserDetails = handleAsyncError(async (req, res, next) => {
 // Update password 
 export const updatePassword = handleAsyncError(async (req, res, next) => {
     const { oldPassword, newPassword, confirmPassword } = req.body;
-
     const user = await User.findById(req.user.id).select("+password");
-
     if (!user) {
         return next(new HandleError("User not found", 404));
     }
-
     const checkPasswordMatch = await user.comparePassword(oldPassword); // ← FIXED METHOD NAME
 
     if (!checkPasswordMatch) {
         return next(new HandleError("Password is incorrect", 400));
     }
-
     if (newPassword !== confirmPassword) {
         return next(new HandleError("Passwords do not match", 400));
     }
-
     user.password = newPassword;
 
     await user.save();
@@ -213,12 +201,10 @@ export const updateProfile = handleAsyncError(async (req, res, next) => {
         name,
         email,
     }
-
     const user = await User.findByIdAndUpdate(req.user.id, updateUserDetails, {
         new: true,
         runValidators: true
     })
-
     res.status(200).json({
         success: true,
         message: "Profile updated Successfully",
@@ -241,11 +227,9 @@ export const getUsersList = handleAsyncError(async (req, res, next) => {
 
 export const getSingleUser = handleAsyncError(async (req, res, next) => {
     const user = await User.findById(req.params.id);
-
     if (!user) {
         return next(new HandleError(`User doesnt exist with this id: ${req.params.id}`, 400))
     }
-
     res.status(200).json({
         success: true,
         user
@@ -268,7 +252,6 @@ export const updateUserRole = handleAsyncError(async (req, res, next) => {
     if (!user) {
         return next(new HandleError("User doesnt exist", 400))
     }
-
     res.status(200).json({
         success: true,
         user
@@ -280,11 +263,9 @@ export const updateUserRole = handleAsyncError(async (req, res, next) => {
 
 export const deleteUserProfile = handleAsyncError(async (req, res, next) => {
     const user = await User.findById(req.params.id);
-
     if (!user) {
         return next(new HandleError("User doesnt exist", 400))
     }
-
     await User.findByIdAndDelete(req.params.id);
     res.status(200).json({
         success: true,
