@@ -281,14 +281,14 @@ export const updateUserRole = handleAsyncError(async (req, res, next) => {
 export const deleteUserProfile = handleAsyncError(async (req, res, next) => {
     const user = await User.findById(req.params.id);
 
-    if(!user){
-          return next(new HandleError("User doesnt exist", 400))
+    if (!user) {
+        return next(new HandleError("User doesnt exist", 400))
     }
 
     await User.findByIdAndDelete(req.params.id);
     res.status(200).json({
-        success:true,
+        success: true,
         message: "User Deleted successfully"
     })
-    
+
 })

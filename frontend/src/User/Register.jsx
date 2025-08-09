@@ -61,7 +61,7 @@ function Register() {
         <div className="form-container container">
             <div className="form-content">
                 <form className="form" onSubmit={handleSubmit}>
-                    <h2 className="form-title">Sign Up</h2>
+                    <h2 className="form-title">Register</h2>
 
                     <div className="input-group">
                         <input
