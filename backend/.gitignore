@@ -1,5 +1,5 @@
 # Backend environment file
-config/config/.env
+Backend/config/config/.env
 
 # Logs
 logs
