@@ -9,6 +9,8 @@ function Register() {
     const [user, setUser] = useState({ name: "", email: "", password: "" })
     const [avatar, setAvatar] = useState("");
     const [avatarPreview, setAvatarPreview] = useState('./images/profile.jpg')
+    const [loading, setLoading] = useState(false); // ✅ Added loading state
+
     const { name, email, password } = user
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -46,9 +48,7 @@ function Register() {
         myForm.set('password', password)
         myForm.set('avatar', avatar)
 
-        for (let pair of myForm.entries())
-            console.log(pair[0] + '-' + pair[1]);
-
+        setLoading(true); // ✅ Show loading when submitting
         dispatch(registerUser(myForm))
     }
 
@@ -56,6 +56,7 @@ function Register() {
         if (error) {
             toast.error(error, { position: "top-right", autoClose: 3000 });
             dispatch(removeErrors());
+            setLoading(false); // ✅ Stop loading on error
         }
     }, [dispatch, error]);
 
@@ -63,6 +64,7 @@ function Register() {
         if (success) {
             toast.success("Registration Successful", { position: "top-right", autoClose: 3000 });
             dispatch(removeSuccess());
+            setLoading(false); // ✅ Stop loading on success
             navigate("/login");
         }
     }, [dispatch, success, navigate]);
@@ -99,7 +101,7 @@ function Register() {
                             onChange={registerData}
                         />
                     </div>
-                    <div className="input-group atavar-group">
+                    <div className="input-group avatar-group">
                         <input
                             type='file'
                             name='avatar'
@@ -107,9 +109,16 @@ function Register() {
                             accept='image/*'
                             onChange={registerData}
                         />
-                        <img src={avatarPreview} alt="avatar Preview" className='avatar' />
+                        <img src={avatarPreview}
+                            alt="avatar Preview"
+                            className='avatar' />
                     </div>
-                    <button className="authBtn">Sign Up</button>
+                    <button className="authBtn"
+                        disabled={loading}>
+                        {loading ?
+                            "Signing up..." : "Sign Up"
+                        }
+                    </button>
                     <p className="form-links">
                         Already have an account?<Link to="/login">Login</Link>
                     </p>
@@ -120,3 +129,4 @@ function Register() {
 }
 
 export default Register
+
