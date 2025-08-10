@@ -10,9 +10,9 @@ import fileUpload from 'express-fileupload';
 const app = express();
 
 // Middleware to parse JSON and  cookies requests
-app.use(express.json());
-app.use(cookieParser());
-app.use(fileUpload());
+app.use(express.json())
+app.use(cookieParser())
+app.use(fileUpload())
 
 
 // Routes

@@ -15,9 +15,9 @@ import crypto from 'crypto'
 export const registerUser = handleAsyncError(async (req, res) => {
     const { name, email, password, avatar } = req.body;
     const myCloud = await cloudinary.uploader.upload(avatar, {
-        folder: "avatars",
+        folder: 'avatars',
         width: 150,
-        crop: "scale"
+        crop: 'scale'
     })
 
     if (!name || !email || !password) {
