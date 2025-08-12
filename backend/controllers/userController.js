@@ -6,6 +6,7 @@ import { sendEmail } from "../utils/sendEmail.js";
 import { v2 as cloudinary } from 'cloudinary';
 import crypto from 'crypto'
     ;
+import { url } from "inspector";
 
 /**
  * @desc    Register a new user
@@ -196,21 +197,41 @@ export const updatePassword = handleAsyncError(async (req, res, next) => {
 // Update User Profile
 
 export const updateProfile = handleAsyncError(async (req, res, next) => {
-    const { name, email } = req.body;
+    const { name, email, avatar } = req.body; // ✅ Get avatar from body
     const updateUserDetails = {
         name,
         email,
+    };
+
+    if (avatar !== "") {
+        const userData = await User.findById(req.user.id); // ✅ different variable name
+        const imageId = userData.avatar.public_id;
+        await cloudinary.uploader.destroy(imageId);
+
+        const myCloud = await cloudinary.uploader.upload(avatar, {
+            folder: "avatars",
+            width: 150,
+            crop: "scale"
+        });
+
+        updateUserDetails.avatar = {
+            public_id: myCloud.public_id,
+            url: myCloud.secure_url,
+        };
     }
+
     const user = await User.findByIdAndUpdate(req.user.id, updateUserDetails, {
         new: true,
         runValidators: true
-    })
+    });
+
     res.status(200).json({
         success: true,
         message: "Profile updated Successfully",
         user
-    })
-})
+    });
+});
+
 
 
 // Admin getting User Information

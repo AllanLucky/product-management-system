@@ -65,7 +65,7 @@
 .navbar-actions {
   display: flex;
   align-items: center;
-  gap: 2rem;
+  gap: 2.5rem;
 }
 
 .navbar-icons {
@@ -89,6 +89,7 @@
   position: relative;
   display: flex;
   align-items: center;
+  margin-right: 6rem;
 }
 
 .cart-badge {

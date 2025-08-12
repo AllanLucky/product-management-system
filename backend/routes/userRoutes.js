@@ -18,12 +18,12 @@ import { roleBasedAccess, verifyUserAuth } from '../middleware/userAuth.js';
 const router = express.Router();
 router.post('/register', registerUser);
 router.post('/login', loginUser);
-router.post('/logout', Logout);
+router.get('/logout', Logout);
 router.post('/password/forgot', requestPasswordReset);
 router.post('/reset/:token', resetPassword);
-router.post('/profile', verifyUserAuth, getUserDetails);
+router.get('/profile', verifyUserAuth, getUserDetails);
 router.post('/password/update', verifyUserAuth, updatePassword);
-router.post('/profile/update', verifyUserAuth, updateProfile);
+router.put('/profile/update', verifyUserAuth, updateProfile);
 
 // admin Routes
 router.get('/admin/users', verifyUserAuth, roleBasedAccess('admin'), getUsersList);

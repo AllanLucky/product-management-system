@@ -7,30 +7,38 @@ import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 import '../pageStyles/search.css';
+import { useSelector } from 'react-redux';
 
 function Navbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
-    const isAuthenticated = false; // Ideally from global state (e.g., Redux or Context)
-    const cartCount = 6; // Replace with dynamic logic later
 
+    // ✅ Corrected useSelector syntax
+    const { isAuthenticated } = useSelector((state) => state.user);
+
+    const cartCount = 6; // Replace with dynamic cart logic later
     const navigate = useNavigate();
 
-    const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-    const toggleSearch = () => setIsSearchOpen(!isSearchOpen);
+    // Toggle menu open/close
+    const toggleMenu = () => setIsMenuOpen((prev) => !prev);
 
+    // Toggle search bar open/close
+    const toggleSearch = () => setIsSearchOpen((prev) => !prev);
+
+    // Handle search form submit
     const handleSearchSubmit = (e) => {
         e.preventDefault();
-        if (searchQuery.trim()) {
-            navigate(`/products?keyword=${encodeURIComponent(searchQuery.trim())}`);
+        const trimmedQuery = searchQuery.trim();
+        if (trimmedQuery) {
+            navigate(`/products?keyword=${encodeURIComponent(trimmedQuery)}`);
         } else {
-            navigate('/products'); // Redirect to products page if search is empty
+            navigate('/products');
         }
-        setSearchQuery(''); // Clear search input after submission
-        // setIsSearchOpen(false); // Close search bar after submissions
+        setSearchQuery('');
     };
 
+    // Auto-focus on search input when opened
     useEffect(() => {
         if (isSearchOpen) {
             document.querySelector('.search-input')?.focus();
@@ -71,17 +79,22 @@ function Navbar() {
                                 type="text"
                                 className="search-input"
                                 placeholder="Search products..."
-                                value={searchQuery} npm
+                                value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
-                            <button type="submit" className="search-icon" aria-label="Submit search" onClick={toggleSearch}>
-                                <SearchIcon focusable="false" />
+                            <button
+                                type="button"
+                                className="search-icon"
+                                aria-label="Toggle search"
+                                onClick={toggleSearch}
+                            >
+                                <SearchIcon />
                             </button>
                         </form>
                     </div>
                 </div>
 
-                {/* Cart & Register */}
+                {/* Cart, Register, Menu Toggle */}
                 <div className="navbar-actions">
                     <div className="cart-container">
                         <Link to="/cart" className="cart-link" aria-label="View cart">
@@ -89,11 +102,13 @@ function Navbar() {
                             <span className="cart-badge">{cartCount}</span>
                         </Link>
                     </div>
+
                     {!isAuthenticated && (
                         <Link to="/register" className="register-link" aria-label="Register">
                             <PersonAddIcon className="icon" />
                         </Link>
                     )}
+
                     <div className="navbar-hamburger" onClick={toggleMenu}>
                         {isMenuOpen ? (
                             <CloseIcon className="icon" aria-label="Close menu" />
