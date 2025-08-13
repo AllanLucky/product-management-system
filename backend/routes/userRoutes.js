@@ -22,7 +22,7 @@ router.get('/logout', Logout);
 router.post('/password/forgot', requestPasswordReset);
 router.post('/reset/:token', resetPassword);
 router.get('/profile', verifyUserAuth, getUserDetails);
-router.post('/password/update', verifyUserAuth, updatePassword);
+router.put('/password/update', verifyUserAuth, updatePassword);
 router.put('/profile/update', verifyUserAuth, updateProfile);
 
 // admin Routes

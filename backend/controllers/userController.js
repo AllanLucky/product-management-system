@@ -178,7 +178,7 @@ export const updatePassword = handleAsyncError(async (req, res, next) => {
     if (!user) {
         return next(new HandleError("User not found", 404));
     }
-    const checkPasswordMatch = await user.comparePassword(oldPassword); // ← FIXED METHOD NAME
+    const checkPasswordMatch = await user.comparePassword(oldPassword);
 
     if (!checkPasswordMatch) {
         return next(new HandleError("Password is incorrect", 400));

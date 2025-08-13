@@ -69,7 +69,6 @@ export const logoutUser = createAsyncThunk(
         }
     }
 );
-
 // UPDATE USER PROFILE
 export const updateProfile = createAsyncThunk(
     'user/updateProfile',
@@ -89,6 +88,28 @@ export const updateProfile = createAsyncThunk(
         }
     }
 );
+
+// UPDATE PASSWORD
+export const updatePassword = createAsyncThunk(
+    'user/updatePassword',
+    async (formData, { rejectWithValue }) => {
+        try {
+            const config = {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            };
+            const { data } = await axios.put('/api/v1/password/update', formData, config);
+            // data should have: { success: true, message: "Password updated successfully" }
+            return data;
+        } catch (error) {
+            return rejectWithValue(
+                error.response?.data?.message || 'Failed to update password'
+            );
+        }
+    }
+);
+
 
 
 // SLICE
@@ -135,7 +156,6 @@ const userSlice = createSlice({
             .addCase(loginUser.pending, (state) => {
                 state.loading = true;
                 state.error = null;
-                state.success = false;
             })
             .addCase(loginUser.fulfilled, (state, action) => {
                 state.loading = false;
@@ -178,7 +198,6 @@ const userSlice = createSlice({
                 state.loading = false;
                 state.user = null;
                 state.isAuthenticated = false;
-                state.success = false;
             })
             .addCase(logoutUser.rejected, (state, action) => {
                 state.loading = false;
@@ -190,7 +209,6 @@ const userSlice = createSlice({
             .addCase(updateProfile.pending, (state) => {
                 state.loading = true;
                 state.error = null;
-                state.success = false; // reset previous success state
             })
             .addCase(updateProfile.fulfilled, (state, action) => {
                 state.loading = false;
@@ -201,7 +219,22 @@ const userSlice = createSlice({
             .addCase(updateProfile.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload || 'Failed to update profile';
-                state.success = false;
+            });
+
+        // UPDATE USER PASSWORD
+        builder
+            .addCase(updatePassword.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(updatePassword.fulfilled, (state, action) => {
+                state.loading = false;
+                state.success = true,
+                    state.message = action.payload?.message || 'Password updated successfully';
+            })
+            .addCase(updatePassword.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload || 'Failed to update password';
             });
 
     }
