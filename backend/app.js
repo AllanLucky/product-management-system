@@ -5,6 +5,7 @@ import userRoutes from './routes/userRoutes.js';
 import errorHandlerMiddleware from './middleware/error.js';
 import cookieParser from 'cookie-parser';
 import fileUpload from 'express-fileupload';
+import mpesaRoutes from "./routes/mpesaRoutes.js";
 
 
 const app = express();
@@ -19,6 +20,8 @@ app.use(fileUpload())
 app.use('/api/v1', productRoutes);
 app.use('/api/v1', userRoutes);
 app.use('/api/v1', orderRoutes)
+app.use("/api/v1", mpesaRoutes);
+
 
 
 

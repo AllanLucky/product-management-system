@@ -42,6 +42,7 @@ const productSchema = new mongoose.Schema(
             max: [99999, "Stock cannot exceed 5 digits"],
             default: 1,
         },
+
         numOfReviews: {
             type: Number,
             default: 0,
@@ -51,10 +52,8 @@ const productSchema = new mongoose.Schema(
                 user: {
                     type: mongoose.Schema.ObjectId,
                     ref: "User",
-                    required: true
-
+                    required: true,
                 },
-
                 name: {
                     type: String,
                     required: true,
@@ -67,17 +66,16 @@ const productSchema = new mongoose.Schema(
                     type: String,
                     required: true,
                 },
-                //Optional: Add review timestamps if needed
                 createdAt: {
                     type: Date,
-                    default: Date.now
-                }
+                    default: Date.now,
+                },
             },
         ],
         user: {
             type: mongoose.Schema.ObjectId,
             ref: "User",
-            required: true, // Optional but recommended: force a user to be linked
+            required: true,
         },
         createdAt: {
             type: Date,
@@ -92,4 +90,3 @@ const productSchema = new mongoose.Schema(
 const Product = mongoose.model("Product", productSchema);
 
 export default Product;
-

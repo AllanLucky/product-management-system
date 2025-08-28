@@ -9,7 +9,8 @@ function Register() {
     const [user, setUser] = useState({ name: "", email: "", password: "" })
     const [avatar, setAvatar] = useState("");
     const [avatarPreview, setAvatarPreview] = useState('./images/profile.jpg')
-    const [loading, setLoading] = useState(false); // ✅ Added loading state
+    const [loading, setLoading] = useState(false);
+    const [submitAttempted, setSubmitAttempted] = useState(false); // <-- track fresh submit
 
     const { name, email, password } = user
     const dispatch = useDispatch();
@@ -48,26 +49,29 @@ function Register() {
         myForm.set('password', password)
         myForm.set('avatar', avatar)
 
-        setLoading(true); // ✅ Show loading when submitting
+        setLoading(true);
+        setSubmitAttempted(true); // mark that user just submitted
         dispatch(registerUser(myForm))
     }
 
     useEffect(() => {
-        if (error) {
+        if (error && submitAttempted) {
             toast.error(error, { position: "top-right", autoClose: 3000 });
             dispatch(removeErrors());
-            setLoading(false); // ✅ Stop loading on error
+            setLoading(false);
+            setSubmitAttempted(false); // reset flag
         }
-    }, [dispatch, error]);
+    }, [dispatch, error, submitAttempted]);
 
     useEffect(() => {
-        if (success) {
+        if (success && submitAttempted) {
             toast.success("Registration Successful", { position: "top-right", autoClose: 3000 });
             dispatch(removeSuccess());
-            setLoading(false); // ✅ Stop loading on success
+            setLoading(false);
+            setSubmitAttempted(false); // reset flag
             navigate("/login");
         }
-    }, [dispatch, success, navigate]);
+    }, [dispatch, success, navigate, submitAttempted]);
 
     return (
         <div className='form-container container'>
@@ -115,9 +119,7 @@ function Register() {
                     </div>
                     <button className="authBtn"
                         disabled={loading}>
-                        {loading ?
-                            "Signing up..." : "Sign Up"
-                        }
+                        {loading ? "Signing up..." : "Sign Up"}
                     </button>
                     <p className="form-links">
                         Already have an account?<Link to="/login">Login</Link>
@@ -129,4 +131,3 @@ function Register() {
 }
 
 export default Register
-

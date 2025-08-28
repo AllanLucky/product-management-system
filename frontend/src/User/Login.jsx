@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import '../UserStyles/Form.css';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom'; // ✅ added useLocation
 import { toast } from 'react-toastify';
 import { loginUser, removeErrors } from '../features/user/userSlice';
 
@@ -10,9 +10,12 @@ function Login() {
         email: '',
         password: ''
     });
+    const [loginAttempted, setLoginAttempted] = useState(false); 
     const { loading, error, isAuthenticated } = useSelector((state) => state.user);
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const location = useLocation(); // ✅ use React Router's location
+    const redirectParam = new URLSearchParams(location.search).get("redirect") || "/"; // ✅ safe redirect
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -33,6 +36,7 @@ function Login() {
             });
             return;
         }
+        setLoginAttempted(true); 
         dispatch(loginUser(formData));
     };
 
@@ -40,18 +44,20 @@ function Login() {
         if (error) {
             toast.error(error, { position: "top-right", autoClose: 3000 });
             dispatch(removeErrors());
+            setLoginAttempted(false); 
         }
-        if (isAuthenticated) {
+
+        if (isAuthenticated && loginAttempted) {
             toast.success("Login successful!", {
                 position: "top-right",
                 autoClose: 3000
             });
 
-            // Clear form after login
             setFormData({ email: '', password: '' });
-            navigate('/');
+            navigate(redirectParam); // ✅ fixed redirect
+            setLoginAttempted(false); 
         }
-    }, [error, isAuthenticated, dispatch, navigate]);
+    }, [error, isAuthenticated, loginAttempted, dispatch, navigate, redirectParam]);
 
     return (
         <div className='form-container container'>

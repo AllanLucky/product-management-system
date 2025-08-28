@@ -1,3 +1,6 @@
+/* ===============================
+   NAVBAR BASE
+================================== */
 .navbar {
   position: fixed;
   top: 0;
@@ -5,8 +8,6 @@
   background-color: var(--bg-primary);
   box-shadow: var(--shadow-sm);
   z-index: 1000;
-
-
 }
 
 .navbar-container {
@@ -19,6 +20,9 @@
   justify-content: space-between;
 }
 
+/* ===============================
+   LOGO
+================================== */
 .navbar-logo a {
   font-size: 1.5rem;
   font-weight: 700;
@@ -31,9 +35,13 @@
   color: var(--primary-main);
 }
 
+/* ===============================
+   LINKS
+================================== */
 .navbar-links {
   flex: 1;
   margin-left: 2rem;
+  transition: all 0.3s ease;
 }
 
 .navbar-links ul {
@@ -55,6 +63,9 @@
   color: var(--primary-light);
 }
 
+/* ===============================
+   SEARCH + ACTIONS
+================================== */
 .search-item {
   display: flex;
   align-items: center;
@@ -75,6 +86,9 @@
   width: 250px;
 }
 
+/* ===============================
+   ICONS & CART
+================================== */
 .icon {
   color: var(--text-primary);
   transition: color 0.2s ease;
@@ -109,6 +123,9 @@
   padding: 0 0.25rem;
 }
 
+/* ===============================
+   REGISTER
+================================== */
 .register-link {
   text-decoration: none;
   display: flex;
@@ -133,22 +150,51 @@
   background-color: var(--primary-dark);
 }
 
+/* ===============================
+   HAMBURGER
+================================== */
 .navbar-hamburger {
   display: none;
   cursor: pointer;
 }
 
+/* ===============================
+   RESPONSIVE
+================================== */
+
+/* Laptops (≤ 1024px) */
+@media (max-width: 1024px) {
+  .navbar-container {
+    padding: 0 1rem;
+  }
+
+  .navbar-links ul {
+    gap: 1.5rem;
+  }
+
+  .navbar-icons {
+    gap: 2rem;
+    width: auto;
+  }
+
+  .cart-container {
+    margin-right: 3rem;
+  }
+}
+
+/* Tablets (≤ 768px) */
 @media (max-width: 768px) {
   .navbar-links {
     display: none;
     position: absolute;
-    top: 4rem;
+    top: 6rem;
     left: 0;
     right: 0;
     background-color: var(--bg-primary);
     padding: 1rem;
     border-top: 1px solid var(--border-color);
     box-shadow: var(--shadow-md);
+    text-align: center;
   }
 
   .navbar-links.active {
@@ -160,8 +206,13 @@
     gap: 1rem;
   }
 
+  .navbar-links.active li {
+    padding: 0.5rem 0;
+  }
+
   .navbar-icons {
     gap: 1.25rem;
+    width: auto;
   }
 
   .navbar-hamburger {
@@ -169,24 +220,54 @@
     margin-left: 1rem;
   }
 
-  .navbar-links.active li {
-    padding: 0.5rem 0;
-  }
-
   .search-item {
     width: 100%;
     justify-content: flex-start;
   }
+}
+
+/* Phones (≤ 480px) */
+@media (max-width: 480px) {
+  .navbar-container {
+    padding: 0 1rem;
+    height: 4.5rem;
+  }
+
+  .navbar-logo a {
+    font-size: 1.2rem;
+  }
+
+  .navbar-links {
+    top: 4.5rem;
+  }
 
   .navbar-icons {
-    width: 300px;
+    gap: 0.8rem;
+  }
+
+  .register-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+  }
+
+  .cart-badge {
+    font-size: 0.65rem;
+    min-width: 1rem;
+    height: 1rem;
   }
 }
 
-.navbar-links {
-  transition: all 0.3s ease;
+/* Large Screens (≥ 1200px) */
+@media (min-width: 1200px) {
+  .navbar-container {
+    max-width: 1400px;
+    padding: 0 2rem;
+  }
 }
 
+/* ===============================
+   ACCESSIBILITY
+================================== */
 a:focus,
 button:focus {
   outline: 2px solid var(--primary-main);

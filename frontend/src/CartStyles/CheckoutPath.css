@@ -1,4 +1,5 @@
 .checkoutPath {
+  margin-top: 1.5rem;
     display: flex;
     justify-content: center;
     gap: 2rem;

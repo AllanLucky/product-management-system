@@ -1,11 +1,18 @@
-import React from "react";
+import React, { useEffect } from "react";
 import '../UserStyles/Profile.css';
 import { Link } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import PageTitle from "../components/PageTitle";
+import { removeSuccess } from "../features/user/userSlice"; // your slice action
 
 function Profile() {
+    const dispatch = useDispatch();
     const { user } = useSelector(state => state.user);
+
+    // Reset previous success/messages on mount
+    useEffect(() => {
+        dispatch(removeSuccess());
+    }, [dispatch]);
 
     return (
         <div className="profile-container">

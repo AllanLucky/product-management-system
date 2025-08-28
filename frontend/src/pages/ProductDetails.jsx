@@ -8,44 +8,65 @@ import Loader from '../components/Loader';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { getProductDetails, removeErrors } from '../features/products/productSlice';
+import { addItemToCart, removeMessage } from '../features/cart/cartSlice';
 import { toast } from 'react-toastify';
 
 function ProductDetails() {
     const [userRating, setUserRating] = useState(0);
+    const [quantity, setQuantity] = useState(1);
 
-    const handleRatingChange = (newRating) => {
-        setUserRating(newRating);
-    };
-
-    const { loading, error, product } = useSelector((state) => state.product);
     const dispatch = useDispatch();
     const { id } = useParams();
 
-    useEffect(() => {
-        if (id) {
-            dispatch(getProductDetails(id));
-        }
+    const { loading, error, product } = useSelector(state => state.product);
+    const { loading: cartLoading, message } = useSelector(state => state.cart);
 
-        return () => {
-            dispatch(removeErrors());
-        };
+    // Fetch product details
+    useEffect(() => {
+        if (id) dispatch(getProductDetails(id));
+        return () => dispatch(removeErrors());
     }, [dispatch, id]);
 
+    // Show errors
     useEffect(() => {
         if (error) {
             toast.error(typeof error === 'string' ? error : error.message || 'An error occurred', {
                 position: 'top-right',
-                autoClose: 3000
+                autoClose: 3000,
             });
             dispatch(removeErrors());
         }
     }, [error, dispatch]);
 
+    // Show cart messages (added/updated) and clear
+    useEffect(() => {
+        if (message) {
+            toast.success(message, { position: 'top-right', autoClose: 3000 });
+            dispatch(removeMessage());
+        }
+    }, [message, dispatch]);
+
     const productName = product?.name || product?.title || 'Product Name';
     const productDescription = product?.description || 'Product Description';
-    const productPrice = product?.price?.toLocaleString() || '965,000';
+    const productPrice = product?.price?.toLocaleString() || '0';
     const productStock = typeof product?.stock === 'number' ? product.stock : 0;
     const productImage = product?.images?.[0]?.url || "/images/hp-laptop.webp";
+
+    // Quantity Handlers
+    const increaseQuantity = () => {
+        if (quantity < productStock) setQuantity(quantity + 1);
+        else toast.error("Cannot exceed available stock!", { position: "top-right", autoClose: 3000 });
+    };
+
+    const decreaseQuantity = () => {
+        if (quantity > 1) setQuantity(quantity - 1);
+        else toast.error("Quantity cannot be less than 1!", { position: "top-right", autoClose: 3000 });
+    };
+
+    // Add to cart
+    const handleAddToCart = () => {
+        dispatch(addItemToCart({ id: product._id, quantity }));
+    };
 
     return (
         <>
@@ -59,16 +80,14 @@ function ProductDetails() {
                     <div className="product-details-container">
                         <div className="product-detail-container">
                             <div className="product-image-container">
-                                <img
-                                    src={productImage}
-                                    alt={productName}
-                                    className='product-detail-image'
-                                />
+                                <img src={productImage} alt={productName} className='product-detail-image' />
                             </div>
+
                             <div className="product-info">
                                 <h2>{productName}</h2>
                                 <p className="product-description">{productDescription}</p>
-                                <p className="product-price">Price: Kes {productPrice}</p>
+                                <p className="product-price">Price: KES {productPrice}</p>
+
                                 <div className="product-rating">
                                     <Rating value={product?.ratings} disabled={true} />
                                     <span className="productCardSpan">
@@ -78,21 +97,24 @@ function ProductDetails() {
 
                                 <div className="stock-status">
                                     <div className={productStock > 0 ? 'in-stock' : 'out-of-stock'}>
-                                        {productStock > 0
-                                            ? `In Stock (${productStock} available)`
-                                            : 'Out of Stock'}
+                                        {productStock > 0 ? `In Stock (${productStock} available)` : 'Out of Stock'}
                                     </div>
 
                                     {productStock > 0 && (
                                         <>
                                             <div className="quantity-control">
                                                 <span className="quantity-label">Quantity:</span>
-                                                <button className="quantity-button">-</button>
-                                                <input type="text" value={1} className='quantity-value' readOnly />
-                                                <button className="quantity-button">+</button>
+                                                <button className="quantity-button" onClick={decreaseQuantity}>-</button>
+                                                <input type="text" value={quantity} className='quantity-value' readOnly />
+                                                <button className="quantity-button" onClick={increaseQuantity}>+</button>
                                             </div>
-                                            <button className="add-to-cart-btn" disabled={productStock === 0}>
-                                                AddToCart
+
+                                            <button
+                                                className="add-to-cart-btn"
+                                                onClick={handleAddToCart}
+                                                disabled={cartLoading}
+                                            >
+                                                {cartLoading ? 'Adding...' : 'Add to Cart'}
                                             </button>
                                         </>
                                     )}
@@ -102,7 +124,7 @@ function ProductDetails() {
                                         <Rating
                                             value={userRating}
                                             disabled={false}
-                                            onRatingChange={handleRatingChange}
+                                            onRatingChange={setUserRating}
                                         />
                                         <textarea className='review-input' placeholder='Write your review here..'></textarea>
                                         <button className="submit-review-btn">Submit Review</button>

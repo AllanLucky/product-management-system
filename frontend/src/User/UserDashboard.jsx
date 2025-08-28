@@ -7,6 +7,7 @@ import { logoutUser, removeSuccess } from '../features/user/userSlice';
 import { useState } from 'react';
 
 function UserDashboard() {
+    const { cartItems } = useSelector(state => state.cart)
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [menuVisible, setMenuVisible] = useState(false);
@@ -20,6 +21,7 @@ function UserDashboard() {
     const options = [
         { name: "Orders", funcName: orders },
         { name: "Account", funcName: profile },
+        { name: `(Cart ${cartItems.length})`, funcName: myCart, isCart: true },
         { name: "Logout", funcName: handleLogout },
     ];
     // If user is admin, add Admin Dashboard at the top
@@ -34,6 +36,9 @@ function UserDashboard() {
     }
     function profile() {
         navigate("/profile");
+    }
+    function myCart() {
+        navigate("/cart");
     }
 
     function handleLogout() {
@@ -71,7 +76,7 @@ function UserDashboard() {
                     {options.map((item, index) => (
                         <button
                             key={index}
-                            className="menu-option-btn"
+                            className={`menu-option-btn ${item.isCart ? (cartItems.length > 0 ? "cart-not-empty" : "") : ""}`}
                             onClick={item.funcName}
                         >
                             {item.name}

@@ -15,11 +15,12 @@ import { url } from "inspector";
  */
 export const registerUser = handleAsyncError(async (req, res) => {
     const { name, email, password, avatar } = req.body;
+
     const myCloud = await cloudinary.uploader.upload(avatar, {
         folder: 'avatars',
         width: 150,
         crop: 'scale'
-    })
+    });
 
     if (!name || !email || !password) {
         return res.status(400).json({
@@ -48,8 +49,14 @@ export const registerUser = handleAsyncError(async (req, res) => {
         }
     });
 
-    sendToken(user, 201, res);
+    // ✅ Do not call sendToken
+    res.status(201).json({
+        success: true,
+        statusCode: 201,
+        message: "User registered successfully. Please log in.",
+    });
 });
+
 
 /**
  * @desc    Login user
@@ -107,7 +114,7 @@ export const requestPasswordReset = handleAsyncError(async (req, res, next) => {
         return next(new HandleError("Could not save reset token. Please try again later", 500));
     }
 
-    const resetPasswordURL = `http://localhost/api/v1/reset/${resetToken}`;
+    const resetPasswordURL = `${req.protocol}://${req.get('host')}/reset/${resetToken}`;
     const message = `Use the following link to reset your password: ${resetPasswordURL}. \n\nThis link will expire in 30 minutes. \n\nIf you didn't request a password reset, please ignore this.`;
 
     try {
