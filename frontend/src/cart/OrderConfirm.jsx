@@ -82,7 +82,6 @@ function OrderConfirm() {
                         </tbody>
                     </table>
                 </div>
-
                 {/* Cart Items */}
                 <div className="confirm-table-container">
                     <table className="confirm-table cart-table">
