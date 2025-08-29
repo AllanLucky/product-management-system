@@ -16,7 +16,7 @@ function OrderConfirm() {
     const subtotal = cartItems?.reduce((acc, item) => acc + item.price * item.quantity, 0) || 0;
 
     // Tax (18%)
-    const tax = subtotal * 0.18;
+    const tax = subtotal * 0.16;
 
     // Shipping logic
     let shippingCharges = 0;
@@ -131,7 +131,7 @@ function OrderConfirm() {
                         <thead>
                             <tr>
                                 <th>Subtotal</th>
-                                <th>Tax (18%)</th>
+                                <th>Tax (16%)</th>
                                 <th>Shipping</th>
                                 <th>Total</th>
                             </tr>

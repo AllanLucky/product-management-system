@@ -27,7 +27,7 @@ function Cart() {
 
     // Totals
     const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
-    const tax = subtotal * 0.18;
+    const tax = subtotal * 0.16;
 
     let shipping = 0;
     if (subtotal > 0 && subtotal < 500_000) {
@@ -89,7 +89,7 @@ function Cart() {
                                 <p className="summary-value">{formatCurrency(subtotal)}</p>
                             </div>
                             <div className="summary-item">
-                                <p className="summary-label">Tax (18%)</p>
+                                <p className="summary-label">Tax (16%)</p>
                                 <p className="summary-value">{formatCurrency(tax)}</p>
                             </div>
                             <div className="summary-item">
