@@ -1,12 +1,14 @@
 import express from "express";
-import { startPayment, paymentNotification } from "../controllers/transactionController.js"
+import { processPayment, paymentNotification } from "../controllers/transactionController.js";
+import { verifyUserAuth } from "../middleware/userAuth.js";
 
 const router = express.Router();
 
-// Route to start a new STK Push transaction
-router.post("/payments/request", startPayment);
+// Protected route: only authenticated users can initiate payment
+router.post("/transaction/process", verifyUserAuth, processPayment);
 
-// Route to handle asynchronous M-Pesa payment notifications (callback)
-router.post("/payments/notification", paymentNotification);
+// Callback route: Safaricom M-Pesa will call this, no auth required
+router.post("/transaction/notify", verifyUserAuth, paymentNotification);
 
 export default router;
+

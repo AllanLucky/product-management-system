@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'react';
 import '../CartStyles/OrderConfirm.css';
 import PageTitle from '../components/PageTitle';
 import Navbar from '../components/Navbar';
@@ -6,30 +6,29 @@ import Footer from '../components/Footer';
 import { useSelector } from 'react-redux';
 import CheckoutPath from './CheckoutPath';
 import { useNavigate } from 'react-router-dom';
+import { createSelector } from '@reduxjs/toolkit';
+
+// Memoized selector to calculate totals
+const selectCartTotals = createSelector(
+    [(state) => state.cart.cartItems],
+    (cartItems) => {
+        const subtotal = cartItems?.reduce((acc, item) => acc + item.price * item.quantity, 0) || 0;
+        const tax = subtotal * 0.16;
+        let shippingCharges = 0;
+        if (subtotal > 0 && subtotal < 500_000) shippingCharges = 50;
+        else if (subtotal >= 500_000 && subtotal < 1_500_000) shippingCharges = subtotal * 0.01;
+        else if (subtotal >= 1_500_000) shippingCharges = 0;
+        const totalPrice = subtotal + tax + shippingCharges;
+
+        return { subtotal, tax, shippingCharges, totalPrice };
+    }
+);
 
 function OrderConfirm() {
-    const { shippingInfo, cartItems } = useSelector(state => state.cart);
-    const { user } = useSelector(state => state.user);
+    const { shippingInfo, cartItems } = useSelector((state) => state.cart);
+    const { user } = useSelector((state) => state.user);
+    const totals = useSelector(selectCartTotals);
     const navigate = useNavigate();
-
-    // Calculate subtotal
-    const subtotal = cartItems?.reduce((acc, item) => acc + item.price * item.quantity, 0) || 0;
-
-    // Tax (18%)
-    const tax = subtotal * 0.16;
-
-    // Shipping logic
-    let shippingCharges = 0;
-    if (subtotal > 0 && subtotal < 500_000) {
-        shippingCharges = 50;
-    } else if (subtotal >= 500_000 && subtotal < 1_500_000) {
-        shippingCharges = subtotal * 0.01;
-    } else if (subtotal >= 1_500_000) {
-        shippingCharges = 0;
-    }
-
-    // Final total
-    const totalPrice = subtotal + tax + shippingCharges;
 
     // Format currency
     const formatCurrency = (amount) =>
@@ -37,19 +36,20 @@ function OrderConfirm() {
             style: 'currency',
             currency: 'KES',
             minimumFractionDigits: 2,
-            maximumFractionDigits: 2
+            maximumFractionDigits: 2,
         });
 
     const proceedToPayment = () => {
-        const data = {
-            subtotal,
-            tax,
-            shippingCharges,
-            totalPrice
-        }
-        sessionStorage.setItem("orderItem", JSON.stringify(data)); // ✅ fixed typo
-        navigate("/process/payment"); // ✅ no spaces in path
-    }
+        // Include phoneNumber and productName for payment
+        const orderData = {
+            ...totals,
+            phoneNumber: shippingInfo?.phoneNumber || user?.phoneNumber || "",
+            productName: cartItems.length === 1 ? cartItems[0].name : "Order Payment",
+        };
+
+        sessionStorage.setItem('orderItem', JSON.stringify(orderData));
+        navigate('/process/payment');
+    };
 
     return (
         <>
@@ -73,15 +73,18 @@ function OrderConfirm() {
                         </thead>
                         <tbody>
                             <tr>
-                                <td>{user?.name}</td>
-                                <td>{shippingInfo?.phoneNumber}</td>
+                                <td>{user?.name || 'N/A'}</td>
+                                <td>{shippingInfo?.phoneNumber || 'N/A'}</td>
                                 <td>
-                                    {shippingInfo?.address}, {shippingInfo?.city}, {shippingInfo?.state}, {shippingInfo?.pinCode}, {shippingInfo?.country}
+                                    {shippingInfo
+                                        ? `${shippingInfo.address}, ${shippingInfo.city}, ${shippingInfo.state}, ${shippingInfo.pinCode}, ${shippingInfo.country}`
+                                        : 'N/A'}
                                 </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
+
                 {/* Cart Items */}
                 <div className="confirm-table-container">
                     <table className="confirm-table cart-table">
@@ -97,23 +100,23 @@ function OrderConfirm() {
                         </thead>
                         <tbody>
                             {cartItems && cartItems.length > 0 ? (
-                                <>
-                                    {cartItems.map((item, index) => (
-                                        <tr key={index}>
-                                            <td>
+                                cartItems.map((item, index) => (
+                                    <tr key={index}>
+                                        <td>
+                                            {item.image ? (
                                                 <img
                                                     src={item.image}
                                                     alt={item.name}
-                                                    style={{ width: "50px", height: "50px", objectFit: "cover" }}
+                                                    style={{ width: '50px', height: '50px', objectFit: 'cover' }}
                                                 />
-                                            </td>
-                                            <td>{item.name}</td>
-                                            <td>{formatCurrency(item.price)}</td>
-                                            <td>{item.quantity}</td>
-                                            <td>{formatCurrency(item.price * item.quantity)}</td>
-                                        </tr>
-                                    ))}
-                                </>
+                                            ) : null}
+                                        </td>
+                                        <td>{item.name}</td>
+                                        <td>{formatCurrency(item.price)}</td>
+                                        <td>{item.quantity}</td>
+                                        <td>{formatCurrency(item.price * item.quantity)}</td>
+                                    </tr>
+                                ))
                             ) : (
                                 <tr>
                                     <td colSpan="5">No items in cart</td>
@@ -137,21 +140,25 @@ function OrderConfirm() {
                         </thead>
                         <tbody>
                             <tr>
-                                <td>{formatCurrency(subtotal)}</td>
-                                <td>{formatCurrency(tax)}</td>
-                                <td>{formatCurrency(shippingCharges)}</td> {/* ✅ fixed */}
-                                <td><strong>{formatCurrency(totalPrice)}</strong></td>
+                                <td>{formatCurrency(totals.subtotal)}</td>
+                                <td>{formatCurrency(totals.tax)}</td>
+                                <td>{formatCurrency(totals.shippingCharges)}</td>
+                                <td>
+                                    <strong>{formatCurrency(totals.totalPrice)}</strong>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
 
-                <button className="proceed-button" onClick={proceedToPayment}>Proceed to Payment</button>
+                <button className="proceed-button" onClick={proceedToPayment}>
+                    Proceed to Payment
+                </button>
             </div>
 
             <Footer />
         </>
-    )
+    );
 }
 
 export default OrderConfirm;

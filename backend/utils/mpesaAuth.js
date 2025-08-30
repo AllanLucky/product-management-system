@@ -3,7 +3,11 @@ export async function getAccessToken() {
         const consumerKey = process.env.MPESA_CONSUMER_KEY;
         const consumerSecret = process.env.MPESA_CONSUMER_SECRET;
 
-        // Convert consumerKey and consumerSecret to base64
+        if (!consumerKey || !consumerSecret) {
+            throw new Error("Missing M-Pesa consumer key or secret in environment variables.");
+        }
+
+        // Convert to base64
         const auth = Buffer.from(`${consumerKey}:${consumerSecret}`).toString('base64');
 
         const response = await fetch(
@@ -11,7 +15,8 @@ export async function getAccessToken() {
             {
                 method: "GET",
                 headers: {
-                    "Authorization": `Basic ${auth}`
+                    "Authorization": `Basic ${auth}`,
+                    "Content-Type": "application/json"
                 }
             }
         );
@@ -21,9 +26,15 @@ export async function getAccessToken() {
         }
 
         const data = await response.json();
-        return data.access_token; // return only the access token
+
+        if (!data.access_token) {
+            throw new Error("No access token returned from Safaricom API");
+        }
+
+        return data.access_token;
+
     } catch (error) {
-        console.error("Error getting access token:", error.message);
+        console.error("Error getting M-Pesa access token:", error.message);
         throw error;
     }
 }

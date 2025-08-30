@@ -49,6 +49,22 @@
   transform: translateY(-2px);
 }
 
+/* Phone input style */
+.payment-phone-input {
+  padding: 0.8rem 1rem;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  outline: none;
+  width: 220px;
+  text-align: center;
+}
+
+.payment-phone-input:focus {
+  border-color: var(--bg-primary);
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
 /* Responsive layout for larger screens */
 @media (min-width: 768px) {
   .payment-container {

@@ -2,20 +2,16 @@ import express from 'express';
 import productRoutes from './routes/productRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import userRoutes from './routes/userRoutes.js';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import transactionRoutes from './routes/transactionRoutes.js'; // ✅ new route
-import errorHandlerMiddleware from './middleware/error.js';
+import transactionRoutes from './routes/transactionRoutes.js';
 import cookieParser from 'cookie-parser';
 import fileUpload from 'express-fileupload';
-// Fix __dirname in ES modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import errorHandlerMiddleware from './middleware/error.js';
 
 const app = express();
 
-// Middleware to parse JSON and cookies
-app.use(express.json());
+// Middleware
+app.use(express.json()); // parse JSON body
+app.use(express.urlencoded({ extended: true })); // parse URL-encoded bodies
 app.use(cookieParser());
 app.use(fileUpload());
 
@@ -23,12 +19,9 @@ app.use(fileUpload());
 app.use('/api/v1', productRoutes);
 app.use('/api/v1', userRoutes);
 app.use('/api/v1', orderRoutes);
-app.use('/api/v1', transactionRoutes);
-app.use('/receipts', express.static(path.join(__dirname, 'receipts')));
+app.use('/api/v1', transactionRoutes); // M-Pesa transactions
 
-// Error handler middleware (keep it last)
+// Error handler (last)
 app.use(errorHandlerMiddleware);
 
 export default app;
-
-

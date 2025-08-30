@@ -1,6 +1,6 @@
 
 import dotenv from 'dotenv';
-dotenv.config({ path: './config/config.env' }); // load env first
+dotenv.config({ path: './config/config.env' });// load env first
 
 import app from './app.js';
 import { connectMongoDatabase } from './config/db.js';

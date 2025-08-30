@@ -1,0 +1,102 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
+/**
+ * Fetches M-Pesa access token from Safaricom API
+ */
+export async function getAccessToken() {
+    try {
+        const consumerKey = process.env.MPESA_CONSUMER_KEY;
+        const consumerSecret = process.env.MPESA_CONSUMER_SECRET;
+
+        if (!consumerKey || !consumerSecret) {
+            throw new Error("Missing M-Pesa consumer key or secret in environment variables.");
+        }
+
+        const auth = Buffer.from(`${consumerKey}:${consumerSecret}`).toString('base64');
+
+        const response = await fetch(
+            "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+            { headers: { "Authorization": `Basic ${auth}` } }
+        );
+
+        if (!response.ok) {
+            throw new Error(`Failed to fetch access token: ${response.status} ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        if (!data.access_token) throw new Error("No access token returned from Safaricom API");
+
+        return data.access_token;
+    } catch (error) {
+        console.error("Error getting M-Pesa access token:", error.message);
+        throw error;
+    }
+}
+
+/**
+ * Initiates M-Pesa STK Push transaction
+ */
+export async function generateStkPush(phoneNumber, amount, productName, customDesc = "", accessToken) {
+    try {
+        const shortcode = process.env.MPESA_SHORTCODE;
+        const passkey = process.env.MPESA_PASSKEY;
+        const callbackUrl = process.env.MPESA_CALLBACK_URL;
+
+        if (!shortcode || !passkey || !callbackUrl) {
+            throw new Error("Missing M-Pesa shortcode, passkey, or callback URL in environment variables.");
+        }
+
+        const generateTimestamp = () => {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, "0");
+            const day = String(now.getDate()).padStart(2, "0");
+            const hours = String(now.getHours()).padStart(2, "0");
+            const minutes = String(now.getMinutes()).padStart(2, "0");
+            const seconds = String(now.getSeconds()).padStart(2, "0");
+            return `${year}${month}${day}${hours}${minutes}${seconds}`;
+        };
+
+        const timestamp = generateTimestamp();
+
+        const password = Buffer.from(shortcode + passkey + timestamp).toString('base64');
+
+        const requestBody = {
+            BusinessShortCode: shortcode,
+            Password: password,
+            Timestamp: timestamp,
+            TransactionType: "CustomerPayBillOnline",
+            Amount: amount,
+            PartyA: phoneNumber,
+            PartyB: shortcode,
+            PhoneNumber: phoneNumber,
+            CallBackURL: callbackUrl,
+            AccountReference: productName,
+            TransactionDesc: customDesc || `Payment of KES ${amount} for ${productName}`,
+        };
+
+        const response = await fetch(
+            "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest",
+            {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${accessToken}`,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(requestBody),
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error(`STK Push request failed: ${response.status} ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        return data;
+
+    } catch (error) {
+        console.error("Error generating STK Push:", error.message);
+        throw error;
+    }
+}
