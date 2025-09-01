@@ -10,7 +10,7 @@ export async function getAccessToken() {
         const consumerSecret = process.env.MPESA_CONSUMER_SECRET;
 
         if (!consumerKey || !consumerSecret) {
-            throw new Error("Missing M-Pesa consumer key or secret in environment variables.");
+            throw new Error("M-Pesa consumer key or secret is missing in environment variables. Please configure them correctly.");
         }
 
         const auth = Buffer.from(`${consumerKey}:${consumerSecret}`).toString('base64');
@@ -21,16 +21,16 @@ export async function getAccessToken() {
         );
 
         if (!response.ok) {
-            throw new Error(`Failed to fetch access token: ${response.status} ${response.statusText}`);
+            throw new Error(`Failed to fetch access token from Safaricom API. Status: ${response.status} ${response.statusText}`);
         }
 
         const data = await response.json();
-        if (!data.access_token) throw new Error("No access token returned from Safaricom API");
+        if (!data.access_token) throw new Error("Safaricom API did not return an access token. Please check your credentials.");
 
         return data.access_token;
     } catch (error) {
-        console.error("Error getting M-Pesa access token:", error.message);
-        throw error;
+        console.error("Error obtaining M-Pesa access token:", error.message);
+        throw new Error("Unable to connect to M-Pesa API. Please try again later.");
     }
 }
 
@@ -44,7 +44,7 @@ export async function generateStkPush(phoneNumber, amount, productName, customDe
         const callbackUrl = process.env.MPESA_CALLBACK_URL;
 
         if (!shortcode || !passkey || !callbackUrl) {
-            throw new Error("Missing M-Pesa shortcode, passkey, or callback URL in environment variables.");
+            throw new Error("M-Pesa shortcode, passkey, or callback URL is missing in environment variables. Please configure them correctly.");
         }
 
         const generateTimestamp = () => {
@@ -59,7 +59,6 @@ export async function generateStkPush(phoneNumber, amount, productName, customDe
         };
 
         const timestamp = generateTimestamp();
-
         const password = Buffer.from(shortcode + passkey + timestamp).toString('base64');
 
         const requestBody = {
@@ -89,7 +88,7 @@ export async function generateStkPush(phoneNumber, amount, productName, customDe
         );
 
         if (!response.ok) {
-            throw new Error(`STK Push request failed: ${response.status} ${response.statusText}`);
+            throw new Error(`Your M-Pesa transaction request could not be processed. Please check your details and try again`);
         }
 
         const data = await response.json();
@@ -97,6 +96,6 @@ export async function generateStkPush(phoneNumber, amount, productName, customDe
 
     } catch (error) {
         console.error("Error generating STK Push:", error.message);
-        throw error;
+        throw new Error(error.message || "Your M-Pesa transaction could not be processed. Please try again.");
     }
 }

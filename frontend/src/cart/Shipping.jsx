@@ -110,7 +110,6 @@ function Shipping() {
         }
 
         dispatch(saveShippingInfo({ address, pinCode, phoneNumber, country, state, city }));
-        toast.success("Shipping info saved!", { position: "top-right", autoClose: 3000 });
         navigate("/order/confirm");
     };
 

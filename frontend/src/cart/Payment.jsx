@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../CartStyles/Payment.css";
 import PageTitle from "../components/PageTitle";
 import Navbar from "../components/Navbar";
@@ -21,27 +21,23 @@ function Payment() {
     };
 
     const { user } = useSelector((state) => state.user || {});
-
     const [phoneNumber, setPhoneNumber] = useState(orderItem.phoneNumber || user?.phoneNumber || "");
 
-    const { status = "idle", error = null, transactionResponse } = useSelector(
+    const { status = "idle", error = null } = useSelector(
         (state) => state.transaction || {}
     );
 
     useEffect(() => {
-        return () => {
-            dispatch(removeErrors());
-        };
+        return () => dispatch(removeErrors());
     }, [dispatch]);
 
     const handlePayment = async () => {
         let formattedPhone = phoneNumber;
 
-        // Format phone number for STK Push
         if (formattedPhone.startsWith("0")) {
             formattedPhone = `254${formattedPhone.slice(1)}`;
-        } else if (!formattedPhone.startsWith("254")) {
-            formattedPhone = `254${formattedPhone}`;
+        } else if (formattedPhone.startsWith("+")) {
+            formattedPhone = formattedPhone.slice(1);
         }
 
         if (!formattedPhone || !orderItem.totalPrice || !orderItem.productName) {
@@ -62,18 +58,21 @@ function Payment() {
             if (initiatePayment.fulfilled.match(resultAction)) {
                 toast.success(
                     resultAction.payload?.message ||
-                    "Your M-Pesa payment request has been successfully initiated. Please check your phone to complete the transaction."
+                    "Your M-Pesa payment request has been successfully initiated. Check your phone."
                 );
 
-
-                // Navigate to order confirmation after a short delay
-                setTimeout(() => navigate("/order/confirm"), 2000);
+                // Redirect user to payment verification page
+                const checkoutId = resultAction.payload.order.checkoutRequestId;
+                navigate(`/payment/verify/${checkoutId}`);
             } else {
-                toast.error(resultAction.payload?.message || "Payment failed, try again.");
+                toast.error(
+                    resultAction.payload?.message ||
+                    "Transaction failed or was cancelled. Please try again."
+                );
             }
         } catch (err) {
             console.error("Payment error:", err);
-            toast.error("Something went wrong. Try again.");
+            toast.error("Something went wrong. Please try again.");
         }
     };
 
@@ -85,50 +84,30 @@ function Payment() {
                 <CheckoutPath activePath={2} />
 
                 <div className="payment-container">
-                    <input
-                        type="tel"
-                        placeholder="Enter phone number"
-                        value={phoneNumber}
-                        onChange={(e) => setPhoneNumber(e.target.value)}
-                        className="payment-phone-input"
-                    />
-                    <Link to="/order/confirm" className="payment-go-back">Back</Link>
-                    <button
-                        className="payment-btn"
-                        onClick={handlePayment}
-                        disabled={status === "loading"}
-                    >
-                        {status === "loading"
-                            ? "Processing..."
-                            : `Make Payment (KES ${orderItem.totalPrice})`}
-                    </button>
-                </div>
-
-                {error && <p className="payment-error">{error}</p>}
-
-                {transactionResponse && (
-                    <div className="payment-success">
-                        <p>{transactionResponse.message}</p>
-                        <p>
-                            <strong>Product:</strong> {transactionResponse.productName}<br />
-                            <strong>Phone:</strong> {transactionResponse.order?.phoneNumber}<br />
-                            <strong>Amount:</strong> KES {transactionResponse.order?.amount}<br />
-                            <strong>Status:</strong> {transactionResponse.order?.status}
-                        </p>
-                        {transactionResponse.receiptPath && (
-                            <p>
-                                Receipt:{" "}
-                                <a
-                                    href={transactionResponse.receiptPath}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    Download PDF
-                                </a>
-                            </p>
-                        )}
+                    <div className="payment-row">
+                        <input
+                            type="tel"
+                            placeholder="Enter phone number"
+                            value={phoneNumber}
+                            onChange={(e) => setPhoneNumber(e.target.value)}
+                            className="payment-phone-input"
+                        />
+                        <Link to="/cart" className="payment-go-back">
+                            Back
+                        </Link>
+                        <button
+                            className="payment-btn"
+                            onClick={handlePayment}
+                            disabled={status === "loading"}
+                        >
+                            {status === "loading"
+                                ? "Processing..."
+                                : `Make Payment (KES ${orderItem.totalPrice})`}
+                        </button>
                     </div>
-                )}
+
+                    {error && <p className="payment-error">{error}</p>}
+                </div>
             </main>
             <Footer />
             <ToastContainer position="top-right" autoClose={3000} />

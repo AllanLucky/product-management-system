@@ -1,5 +1,5 @@
 import express from "express";
-import { processPayment, paymentNotification } from "../controllers/transactionController.js";
+import { processPayment, paymentNotification, verifyPayment } from "../controllers/transactionController.js";
 import { verifyUserAuth } from "../middleware/userAuth.js";
 
 const router = express.Router();
@@ -8,7 +8,11 @@ const router = express.Router();
 router.post("/transaction/process", verifyUserAuth, processPayment);
 
 // Callback route: Safaricom M-Pesa will call this, no auth required
-router.post("/transaction/notify", verifyUserAuth, paymentNotification);
+router.post("/transaction/notify", paymentNotification);
+
+// Route to verify payment status (frontend polling)
+router.get("/transaction/status/:checkoutRequestId", verifyUserAuth, verifyPayment);
 
 export default router;
+
 
