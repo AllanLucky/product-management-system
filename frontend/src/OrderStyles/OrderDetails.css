@@ -1,24 +1,28 @@
-
 .order-box {
-  max-width: 900px;
-  margin: 4rem auto;
-  padding: 1.5rem;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  max-width: 950px;
+  margin: 6rem auto 4rem auto;
+  /* pushes content below navbar */
+  padding: 2.5rem;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
   font-family: 'Arial', sans-serif;
 }
 
-
 .table-block {
-  margin-bottom: 2rem;
+  margin-bottom: 3rem;
+  /* more space between sections */
+  padding: 1rem;
+  border-radius: 10px;
+  background: #fafafa;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .table-title {
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
-  color: #444;
-  border-bottom: 2px solid #f0f0f0;
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  color: #222;
+  border-bottom: 2px solid #eee;
   padding-bottom: 0.5rem;
 }
 
@@ -27,81 +31,120 @@
   border-collapse: collapse;
   text-align: left;
   margin-bottom: 1rem;
+  overflow-x: auto;
 }
 
-.table-head {
+.table-main thead {
   background: #f5f5f5;
 }
 
 .head-cell {
-  padding: 0.8rem;
+  padding: 1rem;
+  font-weight: 600;
+  color: #555;
 }
 
 .table-row {
-  background: #fafafa;
+  background: #fff;
+  transition: background 0.3s, transform 0.2s;
+}
+
+.table-row:hover {
+  background: #f0f0f0;
+  transform: translateY(-2px);
 }
 
 .table-cell {
-  padding: 0.8rem;
-  border-bottom: 1px solid #e0e0e0;
+  padding: 0.9rem;
+  border-bottom: 1px solid #ddd;
+  vertical-align: middle;
+  color: #333;
 }
 
 .item-img {
-  width: 60px;
-  height: 60px;
-  border-radius: 4px;
+  width: 70px;
+  height: 70px;
+  border-radius: 8px;
   object-fit: cover;
+  border: 1px solid #ddd;
 }
 
-.status-tag {
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
+.status-tag,
+.pay-tag {
+  padding: 0.35rem 0.7rem;
+  border-radius: 6px;
   font-weight: bold;
+  text-transform: capitalize;
+  display: inline-block;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+  text-align: center;
+  min-width: 80px;
 }
 
+/* Status colors */
 .status-tag.processing {
-  color: orange;
-  background: rgba(255, 165, 0, 0.2);
+  color: #ff9800;
+  background: rgba(255, 152, 0, 0.15);
 }
 
 .status-tag.delivered {
-  color: green;
-  background: rgba(0, 128, 0, 0.2);
+  color: #28a745;
+  background: rgba(40, 167, 69, 0.15);
 }
 
 .status-tag.cancelled {
   color: #dc3545;
-  background: rgba(220, 53, 69, 0.2);
+  background: rgba(220, 53, 69, 0.15);
 }
 
-.pay-tag {
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
-  font-weight: bold;
-}
-
+/* Payment colors */
 .pay-tag.paid {
   color: #28a745;
-  background: rgba(40, 167, 69, 0.2);
+  background: rgba(40, 167, 69, 0.15);
 }
 
 .pay-tag.not-paid {
   color: #dc3545;
-  background: rgba(220, 53, 69, 0.2);
+  background: rgba(220, 53, 69, 0.15);
 }
 
+/* Responsive */
+@media (max-width: 1024px) {
+  .table-title {
+    font-size: 1.5rem;
+  }
+}
 
 @media (max-width: 768px) {
   .table-title {
-    font-size: 1.2rem;
+    font-size: 1.3rem;
   }
 
   .table-main {
     font-size: 0.9rem;
+    display: block;
+    overflow-x: auto;
   }
 
   .item-img {
     width: 50px;
     height: 50px;
+  }
+
+  .status-tag,
+  .pay-tag {
+    font-size: 0.8rem;
+    min-width: 65px;
+  }
+}
+
+@media (max-width: 480px) {
+  .order-box {
+    padding: 1.5rem;
+  }
+
+  .table-cell {
+    padding: 0.6rem;
   }
 }

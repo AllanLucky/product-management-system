@@ -77,6 +77,25 @@
   transform: translateY(-2px);
 }
 
+/* ✅ Button Group for Success Page */
+.payment-button-group {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.payment-btn-secondary {
+  background-color: #555;
+  color: #fff;
+}
+
+.payment-btn-secondary:hover {
+  background-color: #333;
+  transform: translateY(-2px);
+}
+
 /* Payment error message */
 .payment-error {
   color: red;
@@ -117,7 +136,13 @@
   }
 
   .payment-go-back,
-  .payment-btn {
+  .payment-btn,
+  .payment-btn-secondary {
+    width: 100%;
+  }
+
+  .payment-button-group {
+    flex-direction: column;
     width: 100%;
   }
 }

@@ -1,61 +1,131 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "../CartStyles/PaymentSuccess.css";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
+import PageTitle from "../components/PageTitle";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
+import { useSelector, useDispatch } from "react-redux";
+import { toast } from "react-toastify";
+import { createOrder, removeErrors, removeSuccess } from "../features/orders/orderSlice";
+import { removeItemFromCartLocal } from "../features/cart/cartSlice";
 
 function PaymentSuccess() {
-    const location = useLocation();
-    const order = location.state?.order;
+    const [searchParams] = useSearchParams();
+    const reference = searchParams.get("reference");
+
+    const { cartItems, shippingInfo } = useSelector((state) => state.cart);
+    const { loading, success, error, order } = useSelector((state) => state.order);
+    const { user } = useSelector((state) => state.user || {});
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        const orderItem = JSON.parse(sessionStorage.getItem("orderItem"));
+
+        if (!orderItem) {
+            toast.error("No order details found.", { position: "top-right" });
+            return;
+        }
+
+        const orderData = {
+            shippingInfo: {
+                address: shippingInfo?.address || "",
+                city: shippingInfo?.city || "",
+                state: shippingInfo?.state || "",
+                country: shippingInfo?.country || "",
+                pinCode: shippingInfo?.pinCode || "",
+                phoneNo: shippingInfo?.phoneNo || user?.phoneNumber || "",
+            },
+            orderItems: cartItems.map((item) => ({
+                name: item.name || "Product",
+                price: item.price || 0,
+                quantity: item.quantity || 1,
+                image: item.image || "",      // required
+                product: item._id || item.product || null, // required
+            })),
+            paymentInfo: {
+                id: reference || "N/A", // required
+                status: "Paid",
+                paidAt: new Date(),      // required
+            },
+            itemPrice: orderItem.subtotal || 0,
+            taxPrice: orderItem.tax || 0,
+            shippingPrice: orderItem.shippingCharges || 0,
+            totalPrice: orderItem.totalPrice || 0,
+        };
+
+        console.log("Creating order with data:", orderData);
+        dispatch(createOrder(orderData));
+        sessionStorage.removeItem("orderItem");
+    }, [reference, dispatch, cartItems, shippingInfo, user]);
+
+    useEffect(() => {
+        if (success) {
+            toast.success("Order created successfully!", {
+                position: "top-right",
+                autoClose: 3000,
+            });
+            dispatch(removeItemFromCartLocal());
+            dispatch(removeSuccess());
+        }
+    }, [dispatch, success]);
+
+    useEffect(() => {
+        if (error) {
+            toast.error(error, {
+                position: "top-right",
+                autoClose: 3000,
+            });
+            dispatch(removeErrors());
+        }
+    }, [dispatch, error]);
 
     return (
-        <div className="payment-success-container">
-            <div className="success-content">
-                <div className="success-icon">
-                    <div className="checkmark"></div>
-                </div>
+        <>
+            <PageTitle title="Payment Status" />
+            <Navbar />
+            <div className="payment-success-container">
+                <div className="success-content">
+                    {loading ? (
+                        <div className="loading-spinner">
+                            <p>Processing your order...</p>
+                        </div>
+                    ) : (
+                        <>
+                            <div className="success-icon">
+                                <div className="checkmark"></div>
+                            </div>
+                            <h1>Payment Successful!</h1>
 
-                <h1>Payment Successful!</h1>
-
-                {order ? (
-                    <>
-                        <p className="success-para">
-                            You have successfully paid for{" "}
-                            <strong>{order.productName}</strong> —{" "}
-                            <strong>KES {order.amount}</strong>.
-                        </p>
-                        <div className="order-details">
-                            {order.phoneNumber && (
-                                <p><strong>Phone:</strong> {order.phoneNumber}</p>
-                            )}
-                            {order.status && (
-                                <p><strong>Status:</strong> {order.status}</p>
-                            )}
-                            {order.transactionId && (
-                                <p><strong>Transaction ID:</strong> {order.transactionId}</p>
-                            )}
-                            {order.receiptPath && (
-                                <p>
-                                    <strong>Receipt: </strong>
-                                    <a
-                                        href={order.receiptPath}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="explore-btn"
-                                    >
-                                        Download PDF
-                                    </a>
+                            {order ? (
+                                <>
+                                    <p className="success-para">
+                                        You have successfully paid for{" "}
+                                        <strong>{order.orderItems?.length || "your order"}</strong> —{" "}
+                                        <strong>KES {order.totalPrice?.toLocaleString() || "0"}</strong>.
+                                    </p>
+                                    <div className="order-details">
+                                        <p><strong>Phone:</strong> {order.shippingInfo?.phoneNo}</p>
+                                        <p><strong>Status:</strong> {order.paymentInfo?.status}</p>
+                                        <p><strong>Transaction ID:</strong> {order.paymentInfo?.id}</p>
+                                        <p><strong>Total:</strong> KES {order.totalPrice}</p>
+                                    </div>
+                                </>
+                            ) : (
+                                <p className="success-para">
+                                    Thank you for your purchase. Your payment has been received.
                                 </p>
                             )}
-                        </div>
-                    </>
-                ) : (
-                    <p className="success-para">
-                        Thank you for your purchase. Your payment has been received.
-                    </p>
-                )}
 
-                <Link to="/" className="explore-btn">Go Home</Link>
+                            <div className="payment-button-group">
+                                <Link to="/" className="payment-go-back">Go Home</Link>
+                                <Link to="/orders/user" className="payment-btn payment-btn-secondary">View My Orders</Link>
+                            </div>
+                        </>
+                    )}
+                </div>
             </div>
-        </div>
+            <Footer />
+        </>
     );
 }
 

@@ -20,6 +20,8 @@ import OrderConfirm from './cart/OrderConfirm';
 import Payment from './cart/Payment';
 import PaymentVerification from './cart/PaymentVerification';
 import PaymentSuccess from './cart/PaymentSuccess';
+import MyOrders from './Orders/MyOrders';
+import OrderDetails from './Orders/OrderDetails';
 
 function App() {
   const { isAuthenticated, user } = useSelector((state) => state.user);
@@ -55,6 +57,8 @@ function App() {
         <Route path="/process/payment" element={<ProtectedRoute element={<Payment />} />} />
         <Route path="/payment/verify/:checkoutId" element={<ProtectedRoute element={<PaymentVerification />} />} />
         <Route path="/paymentSuccess" element={<ProtectedRoute element={<PaymentSuccess />} />} />
+        <Route path="/orders/user" element={<ProtectedRoute element={<MyOrders />} />} />
+        <Route path="/order/:id" element={<ProtectedRoute element={<OrderDetails />} />} />
         <Route path="/profile" element={<ProtectedRoute element={<Profile />} />} />
         <Route path="/profile/update" element={<ProtectedRoute element={<UpdateUserProfile />} />} />
         <Route path="/password/update" element={<ProtectedRoute element={<UpdatePassword />} />} />

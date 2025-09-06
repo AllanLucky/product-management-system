@@ -10,7 +10,9 @@ export async function getAccessToken() {
         const consumerSecret = process.env.MPESA_CONSUMER_SECRET;
 
         if (!consumerKey || !consumerSecret) {
-            throw new Error("M-Pesa consumer key or secret is missing in environment variables. Please configure them correctly.");
+            throw new Error(
+                "M-Pesa consumer key or secret is missing in environment variables. Please configure them correctly."
+            );
         }
 
         const auth = Buffer.from(`${consumerKey}:${consumerSecret}`).toString('base64');
@@ -21,11 +23,17 @@ export async function getAccessToken() {
         );
 
         if (!response.ok) {
-            throw new Error(`Failed to fetch access token from Safaricom API. Status: ${response.status} ${response.statusText}`);
+            throw new Error(
+                `Failed to fetch access token from Safaricom API. Status: ${response.status} ${response.statusText}`
+            );
         }
 
         const data = await response.json();
-        if (!data.access_token) throw new Error("Safaricom API did not return an access token. Please check your credentials.");
+        if (!data.access_token) {
+            throw new Error(
+                "Safaricom API did not return an access token. Please check your credentials."
+            );
+        }
 
         return data.access_token;
     } catch (error) {
@@ -44,7 +52,9 @@ export async function generateStkPush(phoneNumber, amount, productName, customDe
         const callbackUrl = process.env.MPESA_CALLBACK_URL;
 
         if (!shortcode || !passkey || !callbackUrl) {
-            throw new Error("M-Pesa shortcode, passkey, or callback URL is missing in environment variables. Please configure them correctly.");
+            throw new Error(
+                "M-Pesa shortcode, passkey, or callback URL is missing in environment variables. Please configure them correctly."
+            );
         }
 
         const generateTimestamp = () => {
@@ -88,14 +98,17 @@ export async function generateStkPush(phoneNumber, amount, productName, customDe
         );
 
         if (!response.ok) {
-            throw new Error(`Your M-Pesa transaction request could not be processed. Please check your details and try again`);
+            throw new Error(
+                "Your M-Pesa transaction request could not be processed. Please check your details and try again."
+            );
         }
 
         const data = await response.json();
         return data;
-
     } catch (error) {
         console.error("Error generating STK Push:", error.message);
-        throw new Error(error.message || "Your M-Pesa transaction could not be processed. Please try again.");
+        throw new Error(
+            error.message || "Your M-Pesa transaction could not be processed. Please try again."
+        );
     }
 }

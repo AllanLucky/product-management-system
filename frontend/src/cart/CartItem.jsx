@@ -1,9 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-    addItemToCart,
-    removeItemFromCart
-} from '../features/cart/cartSlice';
+import { addItemToCart, removeItemFromCart } from '../features/cart/cartSlice';
 import '../CartStyles/Cart.css';
 import { toast } from 'react-toastify';
 
@@ -13,30 +10,30 @@ function CartItem({ item }) {
 
     const [quantity, setQuantity] = useState(item.quantity || 1);
 
-    // ✅ Increment
+    // Sync local quantity with store in case it changes externally
+    useEffect(() => {
+        setQuantity(item.quantity || 1);
+    }, [item.quantity]);
+
+    // Increment quantity with stock limit
     const increment = () => {
         if (quantity < item.stock) {
             setQuantity(quantity + 1);
         } else {
-            toast.error("Cannot exceed stock quantity!", {
-                position: "top-right",
-                autoClose: 3000
-            });
+            toast.error("Cannot exceed stock quantity!", { position: "top-right", autoClose: 3000 });
         }
     };
 
-    // ✅ Decrement
+    // Decrement quantity with minimum limit
     const decrement = () => {
         if (quantity > 1) {
             setQuantity(quantity - 1);
         } else {
-            toast.error("Quantity cannot be less than 1!", {
-                position: "top-right",
-                autoClose: 3000
-            });
+            toast.error("Quantity cannot be less than 1!", { position: "top-right", autoClose: 3000 });
         }
     };
 
+    // Dispatch updated quantity to store
     const updateItem = () => {
         if (loading) return;
         if (quantity !== item.quantity) {
@@ -44,11 +41,13 @@ function CartItem({ item }) {
         }
     };
 
+    // Remove item from cart
     const removeItem = () => {
-        if (loading) return; // prevent double clicks while loading
+        if (loading) return;
         dispatch(removeItemFromCart(item.id));
     };
 
+    // Highlight item if quantity changed locally
     const highlightClass = quantity !== item.quantity ? 'item-updated' : '';
 
     return (
@@ -61,7 +60,7 @@ function CartItem({ item }) {
                 />
                 <div className="item-details">
                     <h3 className="item-name">{item.name || "Unnamed Product"}</h3>
-                    <p className="item-price"><strong>Price:</strong> {item.price || 0}</p>
+                    <p className="item-price"><strong>Price:</strong> {item.price?.toFixed(2) || "0.00"}</p>
                     <p className="item-price"><strong>Quantity:</strong> {quantity}</p>
                 </div>
             </div>

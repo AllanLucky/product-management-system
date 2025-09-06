@@ -49,7 +49,7 @@ const cartSlice = createSlice({
         success: false,
         message: null,
         removingId: null,
-        shippingInfo:JSON.parse(localStorage.getItem("shippingInfo")) || {}
+        shippingInfo: JSON.parse(localStorage.getItem("shippingInfo")) || {}
     },
     reducers: {
         removeErrors: (state) => {
