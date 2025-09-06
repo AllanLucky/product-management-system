@@ -25,20 +25,23 @@ function Cart() {
         }
     }, [error, message, dispatch]);
 
-    // Totals
+    // ✅ TEST MODE (force total = 10 KES)
+    const TEST_MODE = true; // switch to false in production
+
     const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
     const tax = subtotal * 0.16;
 
     let shipping = 0;
     if (subtotal > 0 && subtotal < 500_000) {
-        shipping = 50;
-    } else if (subtotal >= 500_000 && subtotal < 1_500_000) {
+        shipping = 0;
+    } else if (subtotal >= 1 && subtotal < 10) {
         shipping = subtotal * 0.01;
-    } else if (subtotal >= 1_500_000) {
+    } else if (subtotal >= 10 && subtotal < 100) {
         shipping = 0;
     }
 
-    const total = subtotal + tax + shipping;
+    let total = subtotal + tax + shipping;
+
 
     const formatCurrency = (amount) =>
         amount.toLocaleString('en-KE', {
@@ -84,18 +87,22 @@ function Cart() {
                         {/* Price Summary */}
                         <div className="price-summary">
                             <h3 className="price-summary-heading">Price Summary</h3>
-                            <div className="summary-item">
-                                <p className="summary-label">Subtotal</p>
-                                <p className="summary-value">{formatCurrency(subtotal)}</p>
-                            </div>
-                            <div className="summary-item">
-                                <p className="summary-label">Tax (16%)</p>
-                                <p className="summary-value">{formatCurrency(tax)}</p>
-                            </div>
-                            <div className="summary-item">
-                                <p className="summary-label">Shipping</p>
-                                <p className="summary-value">{formatCurrency(shipping)}</p>
-                            </div>
+                            {!TEST_MODE && (
+                                <>
+                                    <div className="summary-item">
+                                        <p className="summary-label">Subtotal</p>
+                                        <p className="summary-value">{formatCurrency(subtotal)}</p>
+                                    </div>
+                                    <div className="summary-item">
+                                        <p className="summary-label">Tax (16%)</p>
+                                        <p className="summary-value">{formatCurrency(tax)}</p>
+                                    </div>
+                                    <div className="summary-item">
+                                        <p className="summary-label">Shipping</p>
+                                        <p className="summary-value">{formatCurrency(shipping)}</p>
+                                    </div>
+                                </>
+                            )}
                             <div className="summary-total">
                                 <p className="total-label">Total</p>
                                 <p className="total-value">{formatCurrency(total)}</p>
@@ -113,5 +120,3 @@ function Cart() {
 }
 
 export default Cart;
-
-
