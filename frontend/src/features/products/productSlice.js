@@ -18,12 +18,10 @@ export const getProduct = createAsyncThunk(
             console.log('Product list response:', data);
             return data;
         } catch (error) {
-            return rejectWithValue(error.response?.data || 'An error occurred');
+            return rejectWithValue(error.response?.data?.message || 'An error occurred');
         }
     }
 );
-
-
 
 // ✅ Get Product Details
 export const getProductDetails = createAsyncThunk(
@@ -34,11 +32,31 @@ export const getProductDetails = createAsyncThunk(
             console.log('Product detail response:', data);
             return data;
         } catch (error) {
-            return rejectWithValue(error.response?.data || 'An error occurred');
+            return rejectWithValue(error.response?.data?.message || 'An error occurred');
         }
     }
 );
 
+// ✅ Create Customer Review
+export const createReview = createAsyncThunk(
+    'product/createReview',
+    async ({ rating, comment, productId }, { rejectWithValue }) => {
+        try {
+            const config = { headers: { "Content-Type": "application/json" } };
+            const { data } = await axios.put(
+                `/api/v1/review`,
+                { rating, comment, productId },
+                config
+            );
+            console.log('Review response:', data);
+            return data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.message || 'An error occurred');
+        }
+    }
+);
+
+// ✅ Initial State
 const initialState = {
     products: [],
     productCount: 0,
@@ -50,8 +68,11 @@ const initialState = {
     product: null,
     stock: null,
     reviews: [],
+    reviewSuccess: false,
+    reviewLoading: false,
 };
 
+// ✅ Slice
 export const productSlice = createSlice({
     name: 'product',
     initialState,
@@ -59,10 +80,13 @@ export const productSlice = createSlice({
         removeErrors: (state) => {
             state.error = null;
         },
+        removeSuccess: (state) => {
+            state.reviewSuccess = false;
+            state.reviewLoading = false;
+        }
     },
     extraReducers: (builder) => {
         builder
-
             // ✅ Get All Products
             .addCase(getProduct.pending, (state) => {
                 state.loading = true;
@@ -75,7 +99,6 @@ export const productSlice = createSlice({
                 state.resultPerPage = action.payload.resultPerPage;
                 state.currentPage = action.payload.currentPage;
                 state.totalPages = action.payload.totalPages;
-                state.error = null;
             })
             .addCase(getProduct.rejected, (state, action) => {
                 state.loading = false;
@@ -93,14 +116,35 @@ export const productSlice = createSlice({
                 state.product = action.payload.product;
                 state.stock = action.payload.product?.stock || 0;
                 state.reviews = action.payload.product?.reviews || [];
-                state.error = null;
             })
             .addCase(getProductDetails.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload || 'Something went wrong';
+            })
+
+            // ✅ Create Review
+            .addCase(createReview.pending, (state) => {
+                state.reviewLoading = true;
+                state.reviewSuccess = false;
+                state.error = null;
+            })
+            .addCase(createReview.fulfilled, (state, action) => {
+                state.reviewLoading = false;
+                state.reviewSuccess = action.payload.success || true;
+
+                // ✅ Update reviews in state if API returns new review
+                if (action.payload.review) {
+                    state.reviews = [action.payload.review, ...state.reviews];
+                }
+            })
+            .addCase(createReview.rejected, (state, action) => {
+                state.reviewLoading = false;
+                state.reviewSuccess = false;
+                state.error = action.payload || 'Failed to submit review';
             });
     },
 });
 
-export const { removeErrors } = productSlice.actions;
+// ✅ Export
+export const { removeErrors, removeSuccess } = productSlice.actions;
 export default productSlice.reducer;
