@@ -14,12 +14,43 @@ function PaymentSuccess() {
                 </div>
 
                 <h1>Payment Successful!</h1>
+
                 {order ? (
-                    <p className="success-para">
-                        You have successfully paid for <strong>{order.productName}</strong> — KES {order.amount}.
-                    </p>
+                    <>
+                        <p className="success-para">
+                            You have successfully paid for{" "}
+                            <strong>{order.productName}</strong> —{" "}
+                            <strong>KES {order.amount}</strong>.
+                        </p>
+                        <div className="order-details">
+                            {order.phoneNumber && (
+                                <p><strong>Phone:</strong> {order.phoneNumber}</p>
+                            )}
+                            {order.status && (
+                                <p><strong>Status:</strong> {order.status}</p>
+                            )}
+                            {order.transactionId && (
+                                <p><strong>Transaction ID:</strong> {order.transactionId}</p>
+                            )}
+                            {order.receiptPath && (
+                                <p>
+                                    <strong>Receipt: </strong>
+                                    <a
+                                        href={order.receiptPath}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="explore-btn"
+                                    >
+                                        Download PDF
+                                    </a>
+                                </p>
+                            )}
+                        </div>
+                    </>
                 ) : (
-                    <p className="success-para">Thank you for your purchase. Your payment has been received.</p>
+                    <p className="success-para">
+                        Thank you for your purchase. Your payment has been received.
+                    </p>
                 )}
 
                 <Link to="/" className="explore-btn">Go Home</Link>

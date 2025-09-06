@@ -7,7 +7,7 @@ import PageTitle from "../components/PageTitle";
 
 function PaymentVerification() {
     const { checkoutId } = useParams();
-    const [status, setStatus] = useState("loading"); // loading, success, failed
+    const [status, setStatus] = useState("loading"); // loading, success, failed, pending
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -17,12 +17,14 @@ function PaymentVerification() {
                 const data = await res.json();
 
                 if (data.status === "SUCCESS") {
-                    // Navigate to success page and pass order data via state
+                    // Redirect to success page with order reference
                     navigate("/payment-success", { state: { order: data.order } });
                 } else if (data.status === "FAILED") {
                     setStatus("failed");
-                } else {
+                } else if (data.status === "PENDING") {
                     setStatus("pending");
+                } else {
+                    setStatus("loading");
                 }
             } catch (err) {
                 console.error("Error fetching payment status:", err);
@@ -64,4 +66,3 @@ function PaymentVerification() {
 }
 
 export default PaymentVerification;
-
