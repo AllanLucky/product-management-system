@@ -7,18 +7,19 @@ import Rating from '../components/Rating';
 import Loader from '../components/Loader';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { getProductDetails, removeErrors } from '../features/products/productSlice';
+import { getProductDetails, removeErrors, createReview, removeSuccess } from '../features/products/productSlice';
 import { addItemToCart, removeMessage } from '../features/cart/cartSlice';
 import { toast } from 'react-toastify';
 
 function ProductDetails() {
     const [userRating, setUserRating] = useState(0);
     const [quantity, setQuantity] = useState(1);
+    const [comment, setComment] = useState('');
 
     const dispatch = useDispatch();
     const { id } = useParams();
 
-    const { loading, error, product } = useSelector(state => state.product);
+    const { loading, error, product, reviewSuccess, reviewLoading } = useSelector(state => state.product);
     const { loading: cartLoading, message } = useSelector(state => state.cart);
 
     // Fetch product details
@@ -46,6 +47,17 @@ function ProductDetails() {
         }
     }, [message, dispatch]);
 
+    // Show review success notification
+    useEffect(() => {
+        if (reviewSuccess) {
+            toast.success('Review submitted successfully!', { position: 'top-right', autoClose: 3000 });
+            setUserRating(0);
+            setComment('');
+            dispatch(getProductDetails(id)); // Refresh reviews
+            dispatch(removeSuccess());
+        }
+    }, [reviewSuccess, dispatch, id]);
+
     const productName = product?.name || product?.title || 'Product Name';
     const productDescription = product?.description || 'Product Description';
     const productPrice = product?.price?.toLocaleString() || '0';
@@ -66,6 +78,15 @@ function ProductDetails() {
     // Add to cart
     const handleAddToCart = () => {
         dispatch(addItemToCart({ id: product._id, quantity }));
+    };
+
+    // Submit Review
+    const handleReviewSubmit = (e) => {
+        e.preventDefault();
+        if (!userRating || !comment.trim()) {
+            return toast.error("Please provide rating and comment", { position: "top-right", autoClose: 3000 });
+        }
+        dispatch(createReview({ rating: userRating, comment, productId: product._id }));
     };
 
     return (
@@ -119,15 +140,27 @@ function ProductDetails() {
                                         </>
                                     )}
 
-                                    <form className='review-form'>
+                                    <form className='review-form' onSubmit={handleReviewSubmit}>
                                         <h3>Write a Review</h3>
                                         <Rating
                                             value={userRating}
                                             disabled={false}
                                             onRatingChange={setUserRating}
                                         />
-                                        <textarea className='review-input' placeholder='Write your review here..'></textarea>
-                                        <button className="submit-review-btn">Submit Review</button>
+                                        <textarea
+                                            className='review-input'
+                                            value={comment}
+                                            onChange={(e) => setComment(e.target.value)}
+                                            placeholder='Write your review here..'
+                                            required
+                                        />
+                                        <button
+                                            type="submit"
+                                            className="submit-review-btn"
+                                            disabled={reviewLoading}
+                                        >
+                                            {reviewLoading ? "Submitting..." : "Submit Review"}
+                                        </button>
                                     </form>
                                 </div>
                             </div>
