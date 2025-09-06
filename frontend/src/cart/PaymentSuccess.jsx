@@ -7,7 +7,7 @@ import Footer from "../components/Footer";
 import { useSelector, useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import { createOrder, removeErrors, removeSuccess } from "../features/orders/orderSlice";
-import { removeItemFromCartLocal } from "../features/cart/cartSlice"; 
+import { removeItemFromCartLocal } from "../features/cart/cartSlice";
 
 function PaymentSuccess() {
     const [searchParams] = useSearchParams();
@@ -15,58 +15,48 @@ function PaymentSuccess() {
 
     const { cartItems, shippingInfo } = useSelector((state) => state.cart);
     const { loading, success, error, order } = useSelector((state) => state.order);
+    const { user } = useSelector((state) => state.user || {});
     const dispatch = useDispatch();
 
     useEffect(() => {
         const orderItem = JSON.parse(sessionStorage.getItem("orderItem"));
 
-        const createOrderData = async () => {
-            try {
-                if (!orderItem) {
-                    toast.error("No order details found.", { position: "top-right" });
-                    return;
-                }
+        if (!orderItem) {
+            toast.error("No order details found.", { position: "top-right" });
+            return;
+        }
 
-                const orderData = {
-                    shippingInfo: {
-                        address: shippingInfo?.address,
-                        city: shippingInfo?.city,
-                        state: shippingInfo?.state,
-                        country: shippingInfo?.country,
-                        pinCode: shippingInfo?.pinCode,   // ✅ match schema
-                        phoneNo: shippingInfo?.phoneNo,   // ✅ required
-                    },
-                    orderItems: cartItems.map((item) => ({
-                        name: item.name,
-                        price: item.price,
-                        quantity: item.quantity,
-                        image: item.image,    // ✅ required
-                        product: item.product, // ✅ required
-                    })),
-                    paymentInfo: {
-                        id: reference,        // ✅ required
-                        status: "Paid",
-                        paidAt: new Date(),   // ✅ required
-                    },
-                    itemPrice: orderItem.subtotal,
-                    taxPrice: orderItem.tax,
-                    shippingPrice: orderItem.shippingCharges,
-                    totalPrice: orderItem.totalPrice,
-                };
-
-                console.log("Creating order with data:", orderData);
-                dispatch(createOrder(orderData));
-                sessionStorage.removeItem("orderItem");
-            } catch (error) {
-                toast.error(error.message || "Error creating order", {
-                    position: "bottom-right",
-                    autoClose: 3000,
-                });
-            }
+        const orderData = {
+            shippingInfo: {
+                address: shippingInfo?.address || "",
+                city: shippingInfo?.city || "",
+                state: shippingInfo?.state || "",
+                country: shippingInfo?.country || "",
+                pinCode: shippingInfo?.pinCode || "",
+                phoneNo: shippingInfo?.phoneNo || user?.phoneNumber || "",
+            },
+            orderItems: cartItems.map((item) => ({
+                name: item.name || "Product",
+                price: item.price || 0,
+                quantity: item.quantity || 1,
+                image: item.image || "",      // required
+                product: item._id || item.product || null, // required
+            })),
+            paymentInfo: {
+                id: reference || "N/A", // required
+                status: "Paid",
+                paidAt: new Date(),      // required
+            },
+            itemPrice: orderItem.subtotal || 0,
+            taxPrice: orderItem.tax || 0,
+            shippingPrice: orderItem.shippingCharges || 0,
+            totalPrice: orderItem.totalPrice || 0,
         };
 
-        createOrderData();
-    }, [reference, dispatch, cartItems, shippingInfo]);
+        console.log("Creating order with data:", orderData);
+        dispatch(createOrder(orderData));
+        sessionStorage.removeItem("orderItem");
+    }, [reference, dispatch, cartItems, shippingInfo, user]);
 
     useEffect(() => {
         if (success) {
@@ -74,10 +64,7 @@ function PaymentSuccess() {
                 position: "top-right",
                 autoClose: 3000,
             });
-
-            // ✅ Clear cart when order is successful
             dispatch(removeItemFromCartLocal());
-
             dispatch(removeSuccess());
         }
     }, [dispatch, success]);
@@ -98,18 +85,15 @@ function PaymentSuccess() {
             <Navbar />
             <div className="payment-success-container">
                 <div className="success-content">
-                    {/* ✅ Loading State */}
                     {loading ? (
                         <div className="loading-spinner">
                             <p>Processing your order...</p>
                         </div>
                     ) : (
                         <>
-                            {/* ✅ Success Check Icon */}
                             <div className="success-icon">
                                 <div className="checkmark"></div>
                             </div>
-
                             <h1>Payment Successful!</h1>
 
                             {order ? (
@@ -119,8 +103,6 @@ function PaymentSuccess() {
                                         <strong>{order.orderItems?.length || "your order"}</strong> —{" "}
                                         <strong>KES {order.totalPrice?.toLocaleString() || "0"}</strong>.
                                     </p>
-
-                                    {/* ✅ Order Details */}
                                     <div className="order-details">
                                         <p><strong>Phone:</strong> {order.shippingInfo?.phoneNo}</p>
                                         <p><strong>Status:</strong> {order.paymentInfo?.status}</p>
@@ -134,14 +116,9 @@ function PaymentSuccess() {
                                 </p>
                             )}
 
-                            {/* ✅ CTA Buttons */}
                             <div className="payment-button-group">
-                                <Link to="/" className="payment-go-back">
-                                    Go Home
-                                </Link>
-                                <Link to="/orders/user" className="payment-btn payment-btn-secondary">
-                                    View My Orders
-                                </Link>
+                                <Link to="/" className="payment-go-back">Go Home</Link>
+                                <Link to="/orders/user" className="payment-btn payment-btn-secondary">View My Orders</Link>
                             </div>
                         </>
                     )}
