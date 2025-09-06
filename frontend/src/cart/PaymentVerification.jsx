@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
 import "../CartStyles/Payment.css";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import PageTitle from "../components/PageTitle";
 
 function PaymentVerification() {
     const { checkoutId } = useParams();
-    const [status, setStatus] = useState("loading"); // loading, success, failed
-    const [order, setOrder] = useState(null);
+    const [status, setStatus] = useState("loading"); // loading, success, failed, pending
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchStatus = async () => {
@@ -17,13 +17,14 @@ function PaymentVerification() {
                 const data = await res.json();
 
                 if (data.status === "SUCCESS") {
-                    setStatus("success");
-                    setOrder(data.order);
+                    // Redirect to success page with order reference
+                    navigate("/payment-success", { state: { order: data.order } });
                 } else if (data.status === "FAILED") {
                     setStatus("failed");
-                    setOrder(data.order);
-                } else {
+                } else if (data.status === "PENDING") {
                     setStatus("pending");
+                } else {
+                    setStatus("loading");
                 }
             } catch (err) {
                 console.error("Error fetching payment status:", err);
@@ -34,7 +35,7 @@ function PaymentVerification() {
         const interval = setInterval(fetchStatus, 5000);
         fetchStatus();
         return () => clearInterval(interval);
-    }, [checkoutId]);
+    }, [checkoutId, navigate]);
 
     return (
         <>
@@ -43,36 +44,15 @@ function PaymentVerification() {
                 <PageTitle title="Payment Verification" />
 
                 <div className="payment-container">
-                    {status === "loading" && <p className="payment-pending">Checking payment status...</p>}
-                    {status === "pending" && (
+                    {status === "loading" && (
                         <p className="payment-pending">
-                            ⏳ Payment is pending. Please complete it on your phone.
+                            <span className="rotating-icon">⏳</span> Checking payment status...
                         </p>
                     )}
-                    {status === "success" && order && (
-                        <div className="payment-success-card">
-                            <p className="payment-success">✅ Payment Successful!</p>
-                            <div className="payment-details">
-                                <p><strong>Product:</strong> {order.productName}</p>
-                                <p><strong>Amount:</strong> KES {order.amount}</p>
-                                <p><strong>Phone:</strong> {order.phoneNumber}</p>
-                                <p><strong>Status:</strong> {order.status}</p>
-                                {order.receiptPath && (
-                                    <p>
-                                        <strong>Receipt:</strong>{" "}
-                                        <a
-                                            href={order.receiptPath}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="payment-go-back"
-                                        >
-                                            Download PDF
-                                        </a>
-                                    </p>
-                                )}
-                            </div>
-                            <Link to="/" className="payment-btn">Go Home</Link>
-                        </div>
+                    {status === "pending" && (
+                        <p className="payment-pending">
+                            <span className="rotating-icon">⏳</span> Payment is pending. Please complete it on your phone.
+                        </p>
                     )}
                     {status === "failed" && (
                         <p className="payment-failed">❌ Payment failed or was cancelled.</p>
