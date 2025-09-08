@@ -7,7 +7,7 @@ import Register from './User/Register';
 import Login from './User/Login';
 import { useDispatch, useSelector } from 'react-redux';
 import { loadUser } from './features/user/userSlice';
-import UserDashboard from './User/userDashboard';
+import UserDashboard from './User/UserDashboard';
 import Profile from './User/profile';
 import ProtectedRoute from './components/ProtectedRoute';
 import UpdateUserProfile from './User/UpdateUserProfile';
@@ -22,6 +22,7 @@ import PaymentVerification from './cart/PaymentVerification';
 import PaymentSuccess from './cart/PaymentSuccess';
 import MyOrders from './Orders/MyOrders';
 import OrderDetails from './Orders/OrderDetails';
+import Dashboard from './Admin/Dashboard';
 
 function App() {
   const { isAuthenticated, user } = useSelector((state) => state.user);
@@ -62,6 +63,9 @@ function App() {
         <Route path="/profile" element={<ProtectedRoute element={<Profile />} />} />
         <Route path="/profile/update" element={<ProtectedRoute element={<UpdateUserProfile />} />} />
         <Route path="/password/update" element={<ProtectedRoute element={<UpdatePassword />} />} />
+
+        {/* Admin Dashboard route */}
+        <Route path="/admin/dashboard" element={<ProtectedRoute element={<Dashboard />} adminOnly={true} />} />
       </Routes>
 
       {/* Show dashboard if authenticated */}
