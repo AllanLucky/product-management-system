@@ -10,7 +10,10 @@ import {
     People,
     ShoppingCart,
     Star,
-    Error
+    Error,
+    Instagram,
+    LinkedIn,
+    YouTube
 } from '@mui/icons-material';
 import Navbar from '../components/Navbar';
 import { Link } from 'react-router-dom';
@@ -62,39 +65,59 @@ function Dashboard() {
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div className="main-content">
-                    <div className="stats-grid">
-                        <div className="stat-box">
-                            <Inventory className='icon' />
-                            <h3>Total Products</h3>
-                            <p>200</p>
+            <div className="main-content">
+                <div className="stats-grid">
+                    <div className="stat-box">
+                        <Inventory className='icon' />
+                        <h3>Total Products</h3>
+                        <p>200</p>
+                    </div>
+                    <div className="stat-box">
+                        <ShoppingCart className='icon' />
+                        <h3>Total Orders</h3>
+                        <p>800</p>
+                    </div>
+                    <div className="stat-box">
+                        <Star className='icon' />
+                        <h3>Total Reviews</h3>
+                        <p>2000</p>
+                    </div>
+                    <div className="stat-box">
+                        <AttachMoney className='icon' />
+                        <h3>Total Revenue</h3>
+                        <p>2700</p>
+                    </div>
+                    <div className="stat-box">
+                        <Error className='icon' />
+                        <h3>Out Of Stock</h3>
+                        <p>2700</p>
+                    </div>
+                    <div className="stat-box">
+                        <CheckCircle className='icon' />
+                        <h3>In Stock</h3>
+                        <p>400</p>
+                    </div>
+                    <div className="social-stats">
+                        <div className="social-box instagram">
+                            <Instagram />
+                            <h3>Instagram</h3>
+                            <p>5000 Followers</p>
+                            <p>125 Posts</p>
                         </div>
-                        <div className="stat-box">
-                            <ShoppingCart className='icon' />
-                            <h3>Total Orders</h3>
-                            <p>800</p>
-                        </div>
-                        <div className="stat-box">
-                            <Star className='icon' />
-                            <h3>Total Reviews</h3>
-                            <p>2000</p>
-                        </div>
-                        <div className="stat-box">
-                            <AttachMoney className='icon' />
-                            <h3>Total Revenue</h3>
-                            <p>2700</p>
-                        </div>
-                        <div className="stat-box">
-                            <Error className='icon' />
-                            <h3>Out Of Stock</h3>
-                            <p>2700</p>
-                        </div>
-                        <div className="stat-box">
-                            <CheckCircle className='icon' />
-                            <h3>In Stock</h3>
-                            <p>400</p>
-                        </div>
+                    </div>
+                    <div className="social-box linkedin">
+                        <LinkedIn />
+                        <h3>LinkedIn</h3>
+                        <p>500 Followers</p>
+                        <p>325 Posts</p>
+                    </div>
+                    <div className="social-box youtube">
+                        <YouTube />
+                        <h3>YouTube</h3>
+                        <p>500 Followers</p>
+                        <p>325 Posts</p>
                     </div>
                 </div>
             </div>
