@@ -25,7 +25,23 @@ function CreateProduct() {
     const [images, setImages] = useState([]);
     const [imagesPreview, setImagesPreview] = useState([]);
 
-    const categories = ["Mobile", "Cameras", "Laptops", "Tvs", "Headphones"];
+    const categories = [
+        "Mobile Phones",
+        "Laptops",
+        "Tablets",
+        "Televisions",
+        "Cameras",
+        "Headphones",
+        "Speakers",
+        "Smart Watches",
+        "Gaming Consoles",
+        "Printers",
+        "Monitors",
+        "Networking Devices",
+        "Smart Home Devices",
+        "Accessories"
+    ];
+
 
     const handleImageChange = (e) => {
         const files = Array.from(e.target.files);

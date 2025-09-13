@@ -14,6 +14,12 @@ function Product({ product }) {
     const productImage = product.images?.[0]?.url || "/images/hp-laptop.webp";
     const reviewLabel = product.numOfReviews === 1 ? "Review" : "Reviews";
 
+    // Limit description preview (first 100 chars)
+    const truncateDescription = (desc, limit = 100) => {
+        if (!desc) return "";
+        return desc.length > limit ? desc.substring(0, limit) + "..." : desc;
+    };
+
     return (
         <Link to={`/product/${product._id}`} className="product_id">
             <div className="product-card">
@@ -24,7 +30,9 @@ function Product({ product }) {
                 />
                 <div className="product-details">
                     <h3 className="product-title">{product.name}</h3>
-                    <p className="product-description">{product.description}</p>
+                    <p className="product-description">
+                        {truncateDescription(product.description, 100)}
+                    </p>
                     <p className="home-price">
                         <strong>Price:</strong> KES {Number(product.price).toLocaleString()}
                     </p>

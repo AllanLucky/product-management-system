@@ -1,3 +1,6 @@
+/* ===========================
+   Base Styles
+=========================== */
 .product-details-container {
   padding: 100px;
 }
@@ -5,20 +8,21 @@
 .product-detail-container {
   max-width: 1200px;
   margin: 0 auto;
-  ;
   display: flex;
   justify-content: space-around;
-  align-items: center;
+  align-items: flex-start;
+  gap: 40px;
 }
 
+/* Image Section */
 .product-image-container {
   position: sticky;
   top: 40px;
+  margin-top: 60px;
   z-index: 10;
   margin-bottom: 20px;
   width: 500px;
 }
-
 
 .product-detail-image {
   width: 100%;
@@ -30,6 +34,9 @@
 
 .product-thumbnails {
   margin-top: 20px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .thumbnail-image {
@@ -37,8 +44,8 @@
   height: 80px;
   object-fit: cover;
   cursor: pointer;
-  margin-left: 10px;
   transition: transform 0.3s, border 0.3s;
+  border-radius: 6px;
 }
 
 .thumbnail-image:hover {
@@ -46,36 +53,62 @@
 }
 
 .thumbnail-image.selected {
-  box-shadow: 0 0 2px black;
+  box-shadow: 0 0 3px black;
 }
 
-
+/* Product Info */
 .product-info {
   padding: 20px;
   width: 500px;
-}
-
-.product-description,
-.product-price {
-  text-align: left;
+  font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.6;
+  color: #333;
 }
 
 .product-info h2 {
-  font-size: 24px;
+  font-size: 28px;
+  font-weight: 700;
   margin-bottom: 15px;
   color: #0F1111;
 }
 
+.product-price {
+  font-size: 22px;
+  font-weight: 600;
+  color: #B12704;
+  margin: 15px 0;
+}
+
+.product-description {
+  font-size: 16px;
+  color: #444;
+  margin: 15px 0;
+  line-height: 1.8;
+  text-align: justify;
+}
+
 .rating {
   display: flex;
-  justify-content: start;
+  align-items: center;
+  margin: 10px 0 20px;
+  font-size: 14px;
+  color: #f0a500;
 }
 
-.productCardSpan {
-  margin-left: 0;
+.stock-status {
+  font-size: 16px;
+  font-weight: 500;
 }
 
+.in-stock {
+  color: #007600;
+}
 
+.out-of-stock {
+  color: #B12704;
+}
+
+/* Quantity */
 .quantity-controls {
   display: flex;
   align-items: center;
@@ -84,8 +117,9 @@
 }
 
 .quantity-label {
-  font-weight: 500;
-  margin-right: 10px;
+  font-weight: 600;
+  font-size: 15px;
+  color: #222;
 }
 
 .quantity-button {
@@ -98,41 +132,40 @@
   border-radius: 4px;
 }
 
-
 .quantity-value {
   width: 50px;
   height: 35px;
   text-align: center;
   border: 1px solid #D5D9D9;
-  margin: 0 5px;
   font-size: 16px;
 }
 
-
+/* Add to Cart */
 .add-to-cart-btn {
   width: 100%;
-  padding: 12px 20px;
-  background: var(--border-color);
-  border: 1px solid var(--bg-primary);
+  padding: 14px 20px;
+  background: #007185;
+  border: none;
   border-radius: 8px;
-  font-size: 16px;
+  font-size: 17px;
+  font-weight: 600;
+  color: #fff;
   cursor: pointer;
   margin: 20px 0;
-  color: var(--text-primary);
+  transition: background 0.3s ease;
 }
 
 .add-to-cart-btn:hover {
-  background: var(--bg-secondary);
+  background: #004f56;
 }
 
-
+/* Reviews */
 .reviews-container {
+  margin-left: 20px;
   grid-column: 1 / -1;
   margin-top: 40px;
   padding-top: 20px;
-  margin-left: 1.5rem;
   border-top: 2px solid #E7E7E7;
-
 }
 
 .review-form {
@@ -153,7 +186,7 @@
 }
 
 .submit-review-btn {
-  background: var(--bg-primary);
+  background: #374759;
   color: white;
   padding: 10px 20px;
   border: none;
@@ -162,12 +195,14 @@
 }
 
 .submit-review-btn:hover {
-  background: #374759;
+  background: #2a3441;
 }
 
-
-.reviews-section {
-  margin-top: 30px;
+.reviews-section h3 {
+  font-size: 22px;
+  margin-bottom: 15px;
+  font-weight: 600;
+  color: #0F1111;
 }
 
 .review-item {
@@ -175,39 +210,28 @@
   border-bottom: 1px solid #E7E7E7;
 }
 
-.review-comment,
-.reviewer-name {
-  margin: 10px 0;
-  color: #333;
+.review-comment {
+  font-size: 15px;
+  color: #444;
   text-align: left;
 }
 
-
-.stock-status {
-  color: #007600;
-  font-size: 16px;
-  margin: 10px 0;
+.reviewer-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #007185;
 }
 
-.in-stock {
-  margin-bottom: 1.5rem;
-}
-
-.out-of-stock {
-  color: #B12704;
-  margin-bottom: 1.5rem;
-}
-
+/* Colors */
 .product-color-selector {
   margin-top: 20px;
 }
 
 .product-color-selector span {
   font-weight: 500;
-  margin-right: 10px;
-  display: block;
   margin-bottom: 8px;
   color: #0F1111;
+  display: block;
 }
 
 .color-options {
@@ -238,34 +262,113 @@
   font-weight: 600;
 }
 
+/* ===========================
+   Responsive Media Queries
+=========================== */
+
+/* Tablets */
+@media (max-width: 1024px) {
+  .product-detail-container {
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .product-image-container,
+  .product-info {
+    width: 90%;
+  }
+
+  .product-info h2 {
+    font-size: 24px;
+  }
+
+  .product-price {
+    font-size: 20px;
+  }
+}
+
+/* Large Mobile */
 @media (max-width: 768px) {
+  .product-details-container {
+    padding: 40px 20px;
+  }
 
   .product-detail-container {
-    display: flex;
     flex-direction: column;
+    gap: 20px;
   }
 
   .product-image-container {
     position: static;
+    width: 100%;
+  }
+
+  .product-info {
+    width: 100%;
+    padding: 15px;
+  }
+
+  .product-info h2 {
+    font-size: 22px;
+  }
+
+  .product-description {
+    font-size: 15px;
+  }
+
+  .add-to-cart-btn {
+    font-size: 15px;
+    padding: 12px 15px;
   }
 }
 
-@media (max-width: 568px) {
+/* Small Mobile */
+@media (max-width: 480px) {
   .product-details-container {
-    width: 80%;
-    scroll-behavior: unset;
-    margin: 0 auto
+    padding: 20px 10px;
   }
 
-  /* Responsive for mobile */
-  @media (max-width: 768px) {
-    .color-options {
-      gap: 6px;
-    }
+  .product-info h2 {
+    font-size: 20px;
+  }
 
-    .color-button {
-      padding: 6px 10px;
-      font-size: 13px;
-    }
+  .product-price {
+    font-size: 18px;
+  }
+
+  .product-description {
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .thumbnail-image {
+    width: 60px;
+    height: 60px;
+  }
+
+  .add-to-cart-btn {
+    font-size: 14px;
+    padding: 10px 12px;
+  }
+
+  .color-button {
+    padding: 6px 10px;
+    font-size: 13px;
+  }
+}
+
+/* Extra Small Devices */
+@media (max-width: 360px) {
+  .product-info h2 {
+    font-size: 18px;
+  }
+
+  .product-price {
+    font-size: 16px;
+  }
+
+  .product-description {
+    font-size: 13px;
   }
 }
