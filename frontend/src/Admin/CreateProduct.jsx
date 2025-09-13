@@ -81,10 +81,10 @@ function CreateProduct() {
 
             // Reset form fields
             setName("");
-            setPrice(0);
+            setPrice();
             setDescription("");
             setCategory("");
-            setStock(0);
+            setStock();
             setImages([]);
             setImagesPreview([]);
 

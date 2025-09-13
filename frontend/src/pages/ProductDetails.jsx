@@ -7,7 +7,12 @@ import Rating from '../components/Rating';
 import Loader from '../components/Loader';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { getProductDetails, removeErrors, createReview, removeSuccess } from '../features/products/productSlice';
+import {
+    getProductDetails,
+    removeErrors,
+    createReview,
+    removeSuccess
+} from '../features/products/productSlice';
 import { addItemToCart, removeMessage } from '../features/cart/cartSlice';
 import { toast } from 'react-toastify';
 
@@ -15,6 +20,8 @@ function ProductDetails() {
     const [userRating, setUserRating] = useState(0);
     const [quantity, setQuantity] = useState(1);
     const [comment, setComment] = useState('');
+    const [selectedImage, setSelectedImage] = useState("");
+    const [selectedColor, setSelectedColor] = useState("");
 
     const dispatch = useDispatch();
     const { id } = useParams();
@@ -28,7 +35,7 @@ function ProductDetails() {
         return () => dispatch(removeErrors());
     }, [dispatch, id]);
 
-    // Show errors
+    // Handle errors
     useEffect(() => {
         if (error) {
             toast.error(typeof error === 'string' ? error : error.message || 'An error occurred', {
@@ -39,7 +46,7 @@ function ProductDetails() {
         }
     }, [error, dispatch]);
 
-    // Show cart messages (added/updated) and clear
+    // Handle cart messages
     useEffect(() => {
         if (message) {
             toast.success(message, { position: 'top-right', autoClose: 3000 });
@@ -47,24 +54,32 @@ function ProductDetails() {
         }
     }, [message, dispatch]);
 
-    // Show review success notification
+    // Handle review success
     useEffect(() => {
         if (reviewSuccess) {
             toast.success('Review submitted successfully!', { position: 'top-right', autoClose: 3000 });
             setUserRating(0);
             setComment('');
-            dispatch(getProductDetails(id)); // Refresh reviews
+            dispatch(getProductDetails(id));
             dispatch(removeSuccess());
         }
     }, [reviewSuccess, dispatch, id]);
+
+    // Initialize selectedImage with the first product image
+    useEffect(() => {
+        if (product && product.images && product.images.length > 0) {
+            setSelectedImage(product.images[0].url);
+        }
+    }, [product]);
 
     const productName = product?.name || product?.title || 'Product Name';
     const productDescription = product?.description || 'Product Description';
     const productPrice = product?.price?.toLocaleString() || '0';
     const productStock = typeof product?.stock === 'number' ? product.stock : 0;
-    const productImage = product?.images?.[0]?.url || "/images/hp-laptop.webp";
+    const productImages = product?.images || [];
+    const productColors = product?.colors || [];
+    const productImage = selectedImage || productImages?.[0]?.url || "/images/hp-laptop.webp";
 
-    // Quantity Handlers
     const increaseQuantity = () => {
         if (quantity < productStock) setQuantity(quantity + 1);
         else toast.error("Cannot exceed available stock!", { position: "top-right", autoClose: 3000 });
@@ -75,12 +90,10 @@ function ProductDetails() {
         else toast.error("Quantity cannot be less than 1!", { position: "top-right", autoClose: 3000 });
     };
 
-    // Add to cart
     const handleAddToCart = () => {
         dispatch(addItemToCart({ id: product._id, quantity }));
     };
 
-    // Submit Review
     const handleReviewSubmit = (e) => {
         e.preventDefault();
         if (!userRating || !comment.trim()) {
@@ -102,6 +115,39 @@ function ProductDetails() {
                         <div className="product-detail-container">
                             <div className="product-image-container">
                                 <img src={productImage} alt={productName} className='product-detail-image' />
+
+                                {/* Thumbnails */}
+                                {productImages.length > 1 && (
+                                    <div className="product-thumbnails">
+                                        {productImages.map((img, index) => (
+                                            <img
+                                                key={index}
+                                                src={img.url}
+                                                alt={`thumbnail-${index + 1}`}
+                                                className={`thumbnail-image ${selectedImage === img.url ? 'active-thumbnail' : ''}`}
+                                                onClick={() => setSelectedImage(img.url)}
+                                            />
+                                        ))}
+                                    </div>
+                                )}
+
+                                {/* Color selector */}
+                                {productColors.length > 0 && (
+                                    <div className="product-color-selector">
+                                        <span>Select Color:</span>
+                                        <div className="color-options">
+                                            {productColors.map((color, index) => (
+                                                <button
+                                                    key={index}
+                                                    className={`color-button ${selectedColor === color ? 'selected-color' : ''}`}
+                                                    onClick={() => setSelectedColor(color)}
+                                                >
+                                                    {color}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
                             <div className="product-info">
