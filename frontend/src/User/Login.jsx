@@ -1,28 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import '../UserStyles/Form.css';
-import { Link, useNavigate, useLocation } from 'react-router-dom'; // ✅ added useLocation
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { loginUser, removeErrors } from '../features/user/userSlice';
 
 function Login() {
-    const [formData, setFormData] = useState({
-        email: '',
-        password: ''
-    });
-    const [loginAttempted, setLoginAttempted] = useState(false); 
+    const [formData, setFormData] = useState({ email: '', password: '' });
+    const [loginAttempted, setLoginAttempted] = useState(false);
+
     const { loading, error, isAuthenticated } = useSelector((state) => state.user);
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const location = useLocation(); // ✅ use React Router's location
-    const redirectParam = new URLSearchParams(location.search).get("redirect") || "/"; // ✅ safe redirect
+    const location = useLocation();
+    const redirectParam = new URLSearchParams(location.search).get("redirect") || "/";
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData((prevData) => ({
-            ...prevData,
-            [name]: value
-        }));
+        setFormData((prevData) => ({ ...prevData, [name]: value }));
     };
 
     const handleSubmit = (e) => {
@@ -36,15 +31,24 @@ function Login() {
             });
             return;
         }
-        setLoginAttempted(true); 
+
+        setLoginAttempted(true);
         dispatch(loginUser(formData));
     };
 
+    // ✅ Auto-redirect if already logged in
+    useEffect(() => {
+        if (isAuthenticated && !loginAttempted) {
+            navigate(redirectParam);
+        }
+    }, [isAuthenticated, loginAttempted, navigate, redirectParam]);
+
+    // ✅ Handle login result
     useEffect(() => {
         if (error) {
             toast.error(error, { position: "top-right", autoClose: 3000 });
             dispatch(removeErrors());
-            setLoginAttempted(false); 
+            setLoginAttempted(false);
         }
 
         if (isAuthenticated && loginAttempted) {
@@ -54,8 +58,8 @@ function Login() {
             });
 
             setFormData({ email: '', password: '' });
-            navigate(redirectParam); // ✅ fixed redirect
-            setLoginAttempted(false); 
+            navigate(redirectParam);
+            setLoginAttempted(false);
         }
     }, [error, isAuthenticated, loginAttempted, dispatch, navigate, redirectParam]);
 

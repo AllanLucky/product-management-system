@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import PageTitle from "../components/PageTitle";
 import "../AdminStyles/ProductsList.css";
@@ -6,12 +6,18 @@ import Footer from "../components/Footer";
 import { Link } from "react-router-dom";
 import { Delete, Edit } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchAdminProducts, removeErrors } from "../features/admin/adminSlice";
+import {
+    fetchAdminProducts,
+    removeErrors,
+    deleteProduct,
+} from "../features/admin/adminSlice";
 import { toast } from "react-toastify";
 
 function ProductList() {
     const { products, loading, error } = useSelector((state) => state.admin);
     const dispatch = useDispatch();
+
+    const [deletingId, setDeletingId] = useState(null);
 
     useEffect(() => {
         dispatch(fetchAdminProducts());
@@ -26,6 +32,39 @@ function ProductList() {
             dispatch(removeErrors()); // Clear error after reporting
         }
     }, [error, dispatch]);
+
+    const handleDelete = async (productId) => {
+        const confirmDelete = window.confirm(
+            "Are you sure you want to delete this product?"
+        );
+        if (!confirmDelete) return;
+
+        try {
+            setDeletingId(productId);
+
+            const action = await dispatch(deleteProduct(productId));
+
+            if (deleteProduct.fulfilled.match(action)) {
+                toast.success("Product deleted successfully", {
+                    position: "top-right",
+                    autoClose: 3000,
+                });
+                dispatch(fetchAdminProducts());
+            } else {
+                toast.error(action.error?.message || "Failed to delete product", {
+                    position: "top-right",
+                    autoClose: 3000,
+                });
+            }
+        } catch (error) {
+            toast.error(error.message || "Failed to delete product");
+        } finally {
+            setDeletingId(null);
+        }
+    };
+
+
+
 
     if (!products || products.length === 0) {
         return (
@@ -89,12 +128,13 @@ function ProductList() {
                                             >
                                                 <Edit />
                                             </Link>
-                                            <Link
-                                                to={`/admin/product/${product._id}`}
+                                            <button
                                                 className="action-icon delete-icon"
+                                                onClick={() => handleDelete(product._id)}
+                                                disabled={deletingId === product._id}
                                             >
-                                                <Delete />
-                                            </Link>
+                                                {deletingId === product._id ? "Deleting..." : <Delete />}
+                                            </button>
                                         </td>
                                     </tr>
                                 ))

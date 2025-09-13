@@ -16,7 +16,7 @@ router.get('/products', getAllProducts);
 router.get('/product/:id', getSingleProduct);
 router.get('/reviews', getProductReviews);
 router.put('/review', verifyUserAuth, creatingProductReviews);
-router.delete('/reviews', verifyUserAuth,deleteProductReview );
+router.delete('/reviews', verifyUserAuth, deleteProductReview);
 
 
 // Admin Routes
