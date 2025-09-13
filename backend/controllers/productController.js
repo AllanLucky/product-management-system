@@ -2,10 +2,32 @@ import Product from "../models/productModel.js";
 import HandleError from "../utils/handleError.js";
 import handleAsyncError from "../middleware/handleAsyncError.js";
 import APIFunctionality from "../utils/apiFunctionality.js";
+import { v2 as cloudinary } from 'cloudinary';
 
 // ✅ Create a new product
 export const createProduct = handleAsyncError(async (req, res, next) => {
-    // Attach the logged-in user's ID to the product (vendor/admin)
+    let images = [];
+
+    if (typeof req.body.images === "string") {
+        images.push(req.body.images);
+    } else if (Array.isArray(req.body.images)) {
+        images = req.body.images;
+    }
+
+    const imagesLink = [];
+
+    for (let i = 0; i < images.length; i++) {
+        const result = await cloudinary.uploader.upload(images[i], {
+            folder: "products"
+        });
+
+        imagesLink.push({
+            public_id: result.public_id,
+            url: result.secure_url,
+        });
+    }
+
+    req.body.images = imagesLink;
     req.body.user = req.user._id;
 
     const product = await Product.create(req.body);
@@ -17,19 +39,17 @@ export const createProduct = handleAsyncError(async (req, res, next) => {
     });
 });
 
-// ✅ Get all products (with search, filter, pagination)
+// ✅ Get all products (search, filter, pagination)
 export const getAllProducts = handleAsyncError(async (req, res, next) => {
-    const resultPerPage = 6; // Number of products per page
+    const resultPerPage = 6;
 
     const apiFeatures = new APIFunctionality(Product.find(), req.query)
         .search()
         .filter();
 
-    // Clone query before pagination to count results
     const filteredQuery = apiFeatures.query.clone();
     const productCount = await filteredQuery.countDocuments();
 
-    // Pagination
     apiFeatures.pagination(resultPerPage);
     const products = await apiFeatures.query;
 
@@ -61,14 +81,14 @@ export const getSingleProduct = handleAsyncError(async (req, res, next) => {
     if (!product) {
         return next(new HandleError("Product not found", 404));
     }
+
     res.status(200).json({
         success: true,
         product,
     });
 });
 
-
-// ✅ Creating and Updating reviews
+// ✅ Create or update a review
 export const creatingProductReviews = handleAsyncError(async (req, res, next) => {
     const { rating, comment, productId } = req.body;
 
@@ -79,99 +99,85 @@ export const creatingProductReviews = handleAsyncError(async (req, res, next) =>
         comment,
     };
 
-    const product = await Product.findById(productId); // ⬅️ Moved above the check
+    const product = await Product.findById(productId);
 
     if (!product) {
         return next(new HandleError("Product not found", 400));
     }
 
-    const reviewExists = product.reviews.find(
-        review => review.user.toString() === req.user.id
+    const existingReview = product.reviews.find(
+        r => r.user.toString() === req.user._id.toString()
     );
 
-    if (reviewExists) {
-        product.reviews.forEach(review => {
-            if (review.user.toString() === req.user.id.toString()) {
-                review.rating = rating;
-                review.comment = comment;
-            }
-        });
+    if (existingReview) {
+        existingReview.rating = rating;
+        existingReview.comment = comment;
     } else {
         product.reviews.push(review);
     }
 
     product.numOfReviews = product.reviews.length;
 
-    let sum = 0;
-    product.reviews.forEach(review => {
-        sum += review.rating;
-    });
+    const totalRating = product.reviews.reduce((sum, r) => sum + r.rating, 0);
+    product.ratings = product.reviews.length > 0 ? totalRating / product.reviews.length : 0;
 
-    product.ratings = product.reviews.length > 0 ? sum / product.reviews.length : 0;
     await product.save({ validateBeforeSave: false });
 
     res.status(200).json({
         success: true,
-        product
+        product,
     });
 });
 
-//✅ Getting Reviews
+// ✅ Get all reviews for a product
 export const getProductReviews = handleAsyncError(async (req, res, next) => {
-
     const product = await Product.findById(req.query.id);
+
     if (!product) {
         return next(new HandleError("Product not found", 400));
     }
+
     res.status(200).json({
         success: true,
-        reviews: product.reviews
+        reviews: product.reviews,
     });
+});
 
-})
-
-//✅ Deleting Product Reviews
+// ✅ Delete a review
 export const deleteProductReview = handleAsyncError(async (req, res, next) => {
-
     const product = await Product.findById(req.query.productId);
+
     if (!product) {
         return next(new HandleError("Product not found", 400));
     }
 
-    const reviews = product.reviews.filter(review => review._id.toString() !== req.query.id.toString());
+    const reviews = product.reviews.filter(
+        r => r._id.toString() !== req.query.id.toString()
+    );
 
-    let sum = 0;
-
-    reviews.forEach(review => {
-        sum += review.rating; // should be `rating`, not `ratings`
-    });
-
-    const ratings = reviews.length > 0 ? sum / reviews.length : 0;
-    const numOfReviews = reviews.length;
+    const totalRating = reviews.reduce((sum, r) => sum + r.rating, 0);
+    const ratings = reviews.length > 0 ? totalRating / reviews.length : 0;
 
     await Product.findByIdAndUpdate(
         req.query.productId,
         {
             reviews,
             ratings,
-            numOfReviews
+            numOfReviews: reviews.length,
         },
         {
             new: true,
-            runValidators: true
+            runValidators: true,
         }
     );
 
     res.status(200).json({
         success: true,
-        message: "Review Deleted Successfully"
+        message: "Review deleted successfully",
     });
-
 });
 
-
-
-// ✅ Update a product by ID
+// ✅ Update a product
 export const updateProduct = handleAsyncError(async (req, res, next) => {
     const product = await Product.findByIdAndUpdate(
         req.params.id,
@@ -190,7 +196,7 @@ export const updateProduct = handleAsyncError(async (req, res, next) => {
     });
 });
 
-// ✅ Delete a product by ID
+// ✅ Delete a product
 export const deleteProduct = handleAsyncError(async (req, res, next) => {
     const product = await Product.findByIdAndDelete(req.params.id);
 
@@ -204,12 +210,12 @@ export const deleteProduct = handleAsyncError(async (req, res, next) => {
     });
 });
 
-// Admin Getting All Products
-
+// ✅ Admin: Get all products
 export const getAdminProducts = handleAsyncError(async (req, res, next) => {
     const products = await Product.find();
+
     res.status(200).json({
         success: true,
-        products
-    })
-})
+        products,
+    });
+});

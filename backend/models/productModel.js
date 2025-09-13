@@ -24,17 +24,17 @@ const productSchema = new mongoose.Schema(
             {
                 public_id: {
                     type: String,
-                    required: [true, "Image public_id is required"],
+                    required: true,
                 },
                 url: {
                     type: String,
-                    required: [true, "Image URL is required"],
+                    required: true,
                 },
             },
         ],
         category: {
             type: String,
-            required: [true, "Please enter product category"],
+            required: true,
         },
         stock: {
             type: Number,
