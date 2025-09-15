@@ -317,7 +317,7 @@ export const updateUserRole = handleAsyncError(async (req, res, next) => {
 
     res.status(200).json({
         success: true,
-        message: `Role updated to ${role}`,
+        message: "User Role Updated Successfull..",
         user,
     });
 });
@@ -332,7 +332,8 @@ export const deleteUserProfile = handleAsyncError(async (req, res, next) => {
     if (!user) {
         return next(new HandleError("User does not exist", 400));
     }
-
+    const imageId = user.avatar.public_id;
+    await cloudinary.uploader.destroy(imageId)
     await User.findByIdAndDelete(req.params.id);
 
     res.status(200).json({

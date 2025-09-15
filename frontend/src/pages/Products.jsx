@@ -16,18 +16,53 @@ function Products() {
   const { loading, error, products, resultPerPage, productCount, totalPages } = useSelector((state) => state.product);
   const dispatch = useDispatch();
   const location = useLocation();
+  const navigate = useNavigate();
 
   const searchParam = new URLSearchParams(location.search);
-  const category = searchParam.get("category");
+  const category = searchParam.get("category"); // short name from URL
   const keyword = searchParam.get("keyword");
   const pageFromURL = parseInt(searchParam.get('page'), 10) || 1;
   const [currentPage, setCurrentPage] = useState(pageFromURL);
-  const navigate = useNavigate();
 
-  const categories = ["laptop", "mobile", "watch", "tvs", "headphone", "tablet"];
+  // Short names for routing
+  const categories = [
+    "mobile",
+    "laptop",
+    "tablet",
+    "tvs",
+    "camera",
+    "headphone",
+    "speakers",
+    "watch",
+    "gaming",
+    "printers",
+    "monitors",
+    "networking",
+    "smarthome",
+    "accessories"
+  ];
+
+  // Full names for display
+  const categoryMap = {
+    mobile: "Mobile Phones",
+    laptop: "Laptops",
+    tablet: "Tablets",
+    tvs: "Televisions",
+    camera: "Cameras",
+    headphone: "Headphones",
+    speakers: "Speakers",
+    watch: "Smart Watches",
+    gaming: "Gaming Consoles",
+    printers: "Printers",
+    monitors: "Monitors",
+    networking: "Networking Devices",
+    smarthome: "Smart Home Devices",
+    accessories: "Accessories"
+  };
 
   useEffect(() => {
-    dispatch(getProduct({ keyword, page: currentPage, category }));
+    const fullCategory = category ? categoryMap[category] : "";
+    dispatch(getProduct({ keyword, page: currentPage, category: fullCategory }));
   }, [dispatch, keyword, currentPage, category]);
 
   useEffect(() => {
@@ -53,14 +88,14 @@ function Products() {
     }
   };
 
-  const handleCategoryClick = (category) => {
+  const handleCategoryClick = (cat) => {
     const newSearchParams = new URLSearchParams(location.search);
-    if (category) {
-      newSearchParams.set('category', category);
+    if (cat) {
+      newSearchParams.set('category', cat); // short name in URL
     } else {
       newSearchParams.delete('category');
     }
-    newSearchParams.set('page', 1); // Reset to first page when changing category
+    newSearchParams.set('page', 1);
     navigate(`?${newSearchParams.toString()}`);
   };
 
@@ -81,7 +116,7 @@ function Products() {
                 className={cat === category ? 'active-category' : ''}
                 onClick={() => handleCategoryClick(cat)}
               >
-                {cat}
+                {categoryMap[cat]}
               </li>
             ))}
           </ul>
@@ -112,4 +147,3 @@ function Products() {
 }
 
 export default Products;
-
