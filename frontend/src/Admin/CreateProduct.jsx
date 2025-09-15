@@ -10,11 +10,11 @@ import {
     removeSuccess,
 } from "../features/admin/adminSlice";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom"; // <-- import useNavigate
+import { useNavigate } from "react-router-dom";
 
 function CreateProduct() {
     const dispatch = useDispatch();
-    const navigate = useNavigate(); // <-- initialize navigate
+    const navigate = useNavigate();
     const { success, loading, error } = useSelector((state) => state.admin);
 
     const [name, setName] = useState("");
@@ -25,23 +25,41 @@ function CreateProduct() {
     const [images, setImages] = useState([]);
     const [imagesPreview, setImagesPreview] = useState([]);
 
-    const categories = [
-        "Mobile Phones",
-        "Laptops",
-        "Tablets",
-        "Televisions",
-        "Cameras",
-        "Headphones",
-        "Speakers",
-        "Smart Watches",
-        "Gaming Consoles",
-        "Printers",
-        "Monitors",
-        "Networking Devices",
-        "Smart Home Devices",
-        "Accessories"
+    // Short category keys for backend
+    const categoryKeys = [
+        "mobile",
+        "laptop",
+        "tablet",
+        "tvs",
+        "camera",
+        "headphone",
+        "speakers",
+        "watch",
+        "gaming",
+        "printers",
+        "monitors",
+        "networking",
+        "smarthome",
+        "accessories"
     ];
 
+    // Full names for display
+    const categoryMap = {
+        mobile: "Mobile Phones",
+        laptop: "Laptops",
+        tablet: "Tablets",
+        tvs: "Televisions",
+        camera: "Cameras",
+        headphone: "Headphones",
+        speakers: "Speakers",
+        watch: "Smart Watches",
+        gaming: "Gaming Consoles",
+        printers: "Printers",
+        monitors: "Monitors",
+        networking: "Networking Devices",
+        smarthome: "Smart Home Devices",
+        accessories: "Accessories"
+    };
 
     const handleImageChange = (e) => {
         const files = Array.from(e.target.files);
@@ -76,7 +94,7 @@ function CreateProduct() {
         myForm.set("name", name);
         myForm.set("price", price);
         myForm.set("description", description);
-        myForm.set("category", category);
+        myForm.set("category", categoryMap[category]); // ✅ send full name to backend
         myForm.set("stock", stock);
         images.forEach((img) => myForm.append("images", img));
 
@@ -95,7 +113,6 @@ function CreateProduct() {
             });
             dispatch(removeSuccess());
 
-            // Reset form fields
             setName("");
             setPrice();
             setDescription("");
@@ -104,8 +121,7 @@ function CreateProduct() {
             setImages([]);
             setImagesPreview([]);
 
-            // Navigate to all products page
-            navigate("/admin/products"); // <-- navigate after success
+            navigate("/admin/products");
         }
     }, [dispatch, success, error, navigate]);
 
@@ -151,9 +167,9 @@ function CreateProduct() {
                         required
                     >
                         <option value="">Select Category</option>
-                        {categories.map((cat) => (
-                            <option key={cat} value={cat}>
-                                {cat}
+                        {categoryKeys.map((key) => (
+                            <option key={key} value={key}>
+                                {categoryMap[key]}
                             </option>
                         ))}
                     </select>

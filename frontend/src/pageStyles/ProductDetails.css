@@ -114,12 +114,14 @@
   align-items: center;
   margin: 20px 0;
   gap: 10px;
+
 }
 
 .quantity-label {
   font-weight: 600;
   font-size: 15px;
   color: #222;
+  margin-right: 10px;
 }
 
 .quantity-button {

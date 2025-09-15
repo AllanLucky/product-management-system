@@ -12,6 +12,7 @@ import {
     deleteProduct,
 } from "../features/admin/adminSlice";
 import { toast } from "react-toastify";
+import Loader from "../components/Loader";
 
 function ProductList() {
     const { products, loading, error } = useSelector((state) => state.admin);
@@ -133,7 +134,7 @@ function ProductList() {
                                                 onClick={() => handleDelete(product._id)}
                                                 disabled={deletingId === product._id}
                                             >
-                                                {deletingId === product._id ? "Deleting..." : <Delete />}
+                                                {deletingId === product._id ? <Loader /> : <Delete />}
                                             </button>
                                         </td>
                                     </tr>
