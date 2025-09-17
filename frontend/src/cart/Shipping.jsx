@@ -23,12 +23,12 @@ function Shipping() {
     const [state, setState] = useState(shippingInfo?.state || "");
     const [city, setCity] = useState(shippingInfo?.city || "");
 
-    // Country/State/City lists
+    // Dropdown lists
     const [countries, setCountries] = useState([]);
     const [states, setStates] = useState([]);
     const [cities, setCities] = useState([]);
 
-    // Load countries once
+    // Load countries
     useEffect(() => {
         setCountries(Country.getAllCountries());
     }, []);
@@ -40,7 +40,7 @@ function Shipping() {
         setCities([]);
     };
 
-    // Update states when country changes
+    // When country changes → update states & phone prefix
     useEffect(() => {
         if (country) {
             const countryStates = State.getStatesOfCountry(country) || [];
@@ -49,7 +49,9 @@ function Shipping() {
 
             const countryData = Country.getCountryByCode(country);
             if (countryData?.phonecode) {
-                setPhoneNumber(`+${countryData.phonecode}`);
+                setPhoneNumber(prev =>
+                    prev.startsWith(`+${countryData.phonecode}`) ? prev : `+${countryData.phonecode}`
+                );
             }
         } else {
             setStates([]);
@@ -58,7 +60,7 @@ function Shipping() {
         }
     }, [country]);
 
-    // Update cities when state changes
+    // When state changes → update cities
     useEffect(() => {
         if (state) {
             const stateCities = City.getCitiesOfState(country, state) || [];
@@ -70,17 +72,20 @@ function Shipping() {
         }
     }, [state, country]);
 
-    // Phone input handler
+    // Phone handler → always keep country code prefix
     const handlePhoneChange = (e) => {
-        let value = e.target.value;
+        let value = e.target.value.replace(/\s+/g, "");
         const countryData = Country.getCountryByCode(country);
-        if (countryData?.phonecode && !value.startsWith(`+${countryData.phonecode}`)) {
-            value = `+${countryData.phonecode}` + value.replace(/^\+?\d*/, "");
+        if (countryData?.phonecode) {
+            const prefix = `+${countryData.phonecode}`;
+            if (!value.startsWith(prefix)) {
+                value = prefix + value.replace(/^\+?\d*/, "");
+            }
         }
         setPhoneNumber(value);
     };
 
-    // Form submission
+    // Submit form
     const handleSubmit = (e) => {
         e.preventDefault();
 
@@ -89,19 +94,19 @@ function Shipping() {
             return;
         }
 
-        // Strip country code for validation
+        // Validate phone (should be exactly 10 digits excluding country code)
         const countryData = Country.getCountryByCode(country);
         let localNumber = phoneNumber;
 
         if (countryData?.phonecode) {
             const code = `+${countryData.phonecode}`;
             if (localNumber.startsWith(code)) {
-                localNumber = localNumber.slice(code.length); // remove country code
+                localNumber = localNumber.slice(code.length);
             }
         }
 
         const digitsOnly = localNumber.replace(/\D/g, "");
-        if (digitsOnly.length !== 9) {
+        if (digitsOnly.length !== 10) {
             toast.error("Invalid phone number! It should be exactly 10 digits without country code.", {
                 position: "top-right",
                 autoClose: 3000,
@@ -127,7 +132,6 @@ function Shipping() {
                             <input
                                 type="text"
                                 id="address"
-                                name="address"
                                 placeholder="Enter your address"
                                 value={address}
                                 onChange={(e) => setAddress(e.target.value)}
@@ -139,7 +143,6 @@ function Shipping() {
                             <input
                                 type="number"
                                 id="pinCode"
-                                name="pinCode"
                                 placeholder="Enter your pinCode"
                                 value={pinCode}
                                 onChange={(e) => setPinCode(e.target.value)}
@@ -151,7 +154,6 @@ function Shipping() {
                             <input
                                 type="tel"
                                 id="phoneNumber"
-                                name="phoneNumber"
                                 placeholder="Enter your Phone No"
                                 value={phoneNumber}
                                 onChange={handlePhoneChange}
@@ -164,7 +166,6 @@ function Shipping() {
                         <div className="shipping-form-group">
                             <label htmlFor="country">Country</label>
                             <select
-                                name="country"
                                 id="country"
                                 value={country}
                                 onChange={(e) => setCountry(e.target.value)}
@@ -180,7 +181,6 @@ function Shipping() {
                         <div className="shipping-form-group">
                             <label htmlFor="state">State</label>
                             <select
-                                name="state"
                                 id="state"
                                 value={state}
                                 onChange={(e) => setState(e.target.value)}
@@ -197,7 +197,6 @@ function Shipping() {
                         <div className="shipping-form-group">
                             <label htmlFor="city">City</label>
                             <select
-                                name="city"
                                 id="city"
                                 value={city}
                                 onChange={(e) => setCity(e.target.value)}
