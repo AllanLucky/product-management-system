@@ -226,16 +226,19 @@ export const deleteProductReview = createAsyncThunk(
             const { data } = await axios.delete(
                 `/api/v1/admin/reviews?id=${reviewId}&productId=${id}`
             );
-            return data;
+
+            return data
         } catch (error) {
             const message =
                 error.response?.data?.message ||
                 error.message ||
                 "Failed to delete product review";
+
             return rejectWithValue(message);
         }
     }
 );
+
 
 
 

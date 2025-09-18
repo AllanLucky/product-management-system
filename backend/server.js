@@ -6,6 +6,12 @@ import app from './app.js';
 import { connectMongoDatabase } from './config/db.js';
 import { v2 as cloudinary } from 'cloudinary';
 
+
+// Load environment variables only in development
+if (process.env.NODE_ENV !== "PRODUCTION") {
+    dotenv.config({ path: "./config/config.env" }); // ✅ correct usage
+}
+
 // Connect to MongoDB
 connectMongoDatabase();
 

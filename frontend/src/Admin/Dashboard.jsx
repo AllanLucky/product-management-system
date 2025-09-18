@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import '../AdminStyles/Dashboard.css';
 import PageTitle from '../components/PageTitle';
 import {
@@ -17,8 +17,27 @@ import {
 } from '@mui/icons-material';
 import Navbar from '../components/Navbar';
 import { Link } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchAdminProducts, fetchAllOrders, fetchAllUsers } from '../features/admin/adminSlice';
 
 function Dashboard() {
+    const { products, orders, totalAmount, users = [] } = useSelector(state => state.admin);
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        dispatch(fetchAdminProducts());
+        dispatch(fetchAllOrders());
+        dispatch(fetchAllUsers())
+    }, [dispatch]);
+
+    const totalProducts = products.length;
+    const totalOrders = orders.length;
+    const totalUsers = users.length;
+    const outOfStockProducts = products.filter(product => product.stock === 0);
+    const outOfStock = outOfStockProducts.length;
+    const inStock = products.filter(product => product.stock > 0).length;
+    const totalReviews = products.reduce((acc, product) => acc + (product.reviews?.length || 0), 0);
+
     return (
         <>
             <PageTitle title="Admin Dashboard" />
@@ -70,35 +89,55 @@ function Dashboard() {
             <div className="main-content">
                 <div className="stats-grid">
                     <div className="stat-box">
+                        <People className='icon' />
+                        <h3>Total Users</h3>
+                        <p>{totalUsers}</p>
+                    </div>
+                    <div className="stat-box">
                         <Inventory className='icon' />
                         <h3>Total Products</h3>
-                        <p>200</p>
+                        <p>{totalProducts}</p>
                     </div>
                     <div className="stat-box">
                         <ShoppingCart className='icon' />
                         <h3>Total Orders</h3>
-                        <p>800</p>
+                        <p>{totalOrders}</p>
                     </div>
                     <div className="stat-box">
                         <Star className='icon' />
                         <h3>Total Reviews</h3>
-                        <p>2000</p>
+                        <p>{totalReviews}</p>
                     </div>
                     <div className="stat-box">
                         <AttachMoney className='icon' />
                         <h3>Total Revenue</h3>
-                        <p>2700</p>
+                        <p>{totalAmount}</p>
                     </div>
                     <div className="stat-box">
                         <Error className='icon' />
                         <h3>Out Of Stock</h3>
-                        <p>2700</p>
+                        <p>{outOfStock}</p>
                     </div>
                     <div className="stat-box">
                         <CheckCircle className='icon' />
                         <h3>In Stock</h3>
-                        <p>400</p>
+                        <p>{inStock}</p>
                     </div>
+
+                    {/* ✅ Display Out of Stock Products */}
+                    {outOfStockProducts.length > 0 && (
+                        <div className="out-of-stock-list">
+                            <h3>Out of Stock Products</h3>
+                            <ul>
+                                {outOfStockProducts.map(product => (
+                                    <li key={product._id}>
+                                        {product.name} (Stock: {product.stock})
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+
                     <div className="social-stats">
                         <div className="social-box instagram">
                             <Instagram />

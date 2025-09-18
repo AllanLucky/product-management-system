@@ -9,20 +9,25 @@ import {
     fetchAdminProducts,
     fetchAllProductReviews,
     deleteProductReview,
-    removeErrors
+    removeErrors,
+    clearMessage
 } from '../features/admin/adminSlice';
 import { toast } from 'react-toastify';
 import Loader from '../components/Loader';
 
 function ReviewsList() {
-    const { products, loading, reviews, error, deleteLoading } = useSelector(state => state.admin);
+    const { products, loading, reviews, error, success, deleteLoading } = useSelector(
+        state => state.admin
+    );
     const [selectedProduct, setSelectedProduct] = useState(null);
     const dispatch = useDispatch();
 
+    // Load all products initially
     useEffect(() => {
         dispatch(fetchAdminProducts());
     }, [dispatch]);
 
+    // Show error toast
     useEffect(() => {
         if (error) {
             toast.error(error, { position: 'top-right', autoClose: 3000 });
@@ -30,16 +35,25 @@ function ReviewsList() {
         }
     }, [dispatch, error]);
 
+    // Show success toast
+    useEffect(() => {
+        if (success) {
+            toast.success(success, { position: 'top-right', autoClose: 3000 });
+            dispatch(clearMessage());
+        }
+    }, [dispatch, success]);
+
     const handleViewReviews = (id) => {
         setSelectedProduct(id);
         dispatch(fetchAllProductReviews(id));
     };
 
     const handleDeleteReview = (reviewId) => {
-        dispatch(deleteProductReview({ productId: selectedProduct, reviewId }))
+        dispatch(deleteProductReview({ id: selectedProduct, reviewId }))
+            .unwrap()
             .then(() => {
-                toast.success("Review deleted successfully", { position: 'top-right', autoClose: 3000 });
-                dispatch(fetchAllProductReviews(selectedProduct)); // Refresh reviews
+                // Refresh reviews after deletion
+                dispatch(fetchAllProductReviews(selectedProduct));
             })
             .catch(() => {
                 toast.error("Failed to delete review", { position: 'top-right', autoClose: 3000 });
