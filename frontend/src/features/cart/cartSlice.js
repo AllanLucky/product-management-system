@@ -1,44 +1,16 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-// ✅ Safe localStorage access
-const isBrowser = typeof window !== "undefined";
-
+// ✅ Helper: Get current user key for localStorage
 const getUserKey = () => {
-    if (isBrowser) {
-        try {
-            const userInfo = JSON.parse(localStorage.getItem("userInfo"));
-            return userInfo?.email || "guest";
-        } catch {
-            return "guest";
-        }
-    }
-    return "guest";
+    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+    return userInfo?.email || "guest";
 };
 
-const getStoredCart = () => {
-    if (isBrowser) {
-        try {
-            return JSON.parse(localStorage.getItem(`cartItems_${getUserKey()}`)) || [];
-        } catch {
-            return [];
-        }
-    }
-    return [];
-};
+// ✅ Load cart for current user
+const storedCart = JSON.parse(localStorage.getItem(`cartItems_${getUserKey()}`)) || [];
+const storedShipping = JSON.parse(localStorage.getItem("shippingInfo")) || {};
 
-const getStoredShipping = () => {
-    if (isBrowser) {
-        try {
-            return JSON.parse(localStorage.getItem("shippingInfo")) || {};
-        } catch {
-            return {};
-        }
-    }
-    return {};
-};
-
-// ✅ Async Thunks
 export const addItemToCart = createAsyncThunk(
     "cart/addItemToCart",
     async ({ id, quantity }, { rejectWithValue }) => {
@@ -54,7 +26,7 @@ export const addItemToCart = createAsyncThunk(
             };
         } catch (error) {
             return rejectWithValue(
-                error.response?.data?.message || "Failed to add item to cart."
+                error.response?.data?.message || "Failed to add item to cart. Please try again."
             );
         }
     }
@@ -67,23 +39,22 @@ export const removeItemFromCart = createAsyncThunk(
             return id;
         } catch (error) {
             return rejectWithValue(
-                error.response?.data?.message || "Failed to remove item."
+                error.response?.data?.message || "Failed to remove item"
             );
         }
     }
 );
 
-// ✅ Slice
 const cartSlice = createSlice({
     name: "cart",
     initialState: {
-        cartItems: getStoredCart(),
-        shippingInfo: getStoredShipping(),
+        cartItems: storedCart,
         loading: false,
         error: null,
         success: false,
         message: null,
         removingId: null,
+        shippingInfo: storedShipping,
     },
     reducers: {
         removeErrors: (state) => {
@@ -93,18 +64,15 @@ const cartSlice = createSlice({
             state.message = null;
         },
         removeItemFromCartLocal: (state) => {
+            const userKey = getUserKey();
             state.cartItems = [];
             state.message = "Cart cleared successfully";
-            if (isBrowser) {
-                localStorage.setItem(`cartItems_${getUserKey()}`, JSON.stringify([]));
-            }
+            localStorage.setItem(`cartItems_${userKey}`, JSON.stringify([]));
         },
         saveShippingInfo: (state, action) => {
             state.shippingInfo = action.payload;
-            if (isBrowser) {
-                localStorage.setItem("shippingInfo", JSON.stringify(state.shippingInfo));
-            }
-        },
+            localStorage.setItem("shippingInfo", JSON.stringify(state.shippingInfo));
+        }
     },
     extraReducers: (builder) => {
         builder
@@ -113,23 +81,23 @@ const cartSlice = createSlice({
                 state.error = null;
             })
             .addCase(addItemToCart.fulfilled, (state, action) => {
-                const newItem = action.payload;
-                const existingItem = state.cartItems.find((item) => item.id === newItem.id);
+                const Item = action.payload;
+                const existingItem = state.cartItems.find((item) => item.id === Item.id);
 
                 if (existingItem) {
-                    existingItem.quantity = Math.min(newItem.quantity, newItem.stock);
+                    existingItem.quantity = Math.min(Item.quantity, Item.stock);
                     state.message = "Cart updated successfully";
                 } else {
-                    state.cartItems.push(newItem);
+                    state.cartItems.push(Item);
                     state.message = "Item added to cart successfully";
                 }
 
                 state.loading = false;
+                state.error = null;
                 state.success = true;
 
-                if (isBrowser) {
-                    localStorage.setItem(`cartItems_${getUserKey()}`, JSON.stringify(state.cartItems));
-                }
+                const userKey = getUserKey();
+                localStorage.setItem(`cartItems_${userKey}`, JSON.stringify(state.cartItems));
             })
             .addCase(addItemToCart.rejected, (state, action) => {
                 state.loading = false;
@@ -144,9 +112,8 @@ const cartSlice = createSlice({
                 state.message = "Item removed from cart successfully";
                 state.loading = false;
 
-                if (isBrowser) {
-                    localStorage.setItem(`cartItems_${getUserKey()}`, JSON.stringify(state.cartItems));
-                }
+                const userKey = getUserKey();
+                localStorage.setItem(`cartItems_${userKey}`, JSON.stringify(state.cartItems));
             })
             .addCase(removeItemFromCart.rejected, (state, action) => {
                 state.loading = false;
@@ -156,10 +123,10 @@ const cartSlice = createSlice({
 });
 
 export const {
-    removeErrors,
-    removeMessage,
     removeItemFromCartLocal,
     saveShippingInfo,
+    removeErrors,
+    removeMessage
 } = cartSlice.actions;
 
 export default cartSlice.reducer;
