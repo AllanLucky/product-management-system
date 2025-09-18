@@ -1,3 +1,4 @@
+import { Reviews } from "@mui/icons-material";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 
@@ -200,6 +201,49 @@ export const updatingOrder = createAsyncThunk(
     }
 );
 
+// ✅ FETCH ALL PRODUCT REVIEWS -- ADMIN
+export const fetchAllProductReviews = createAsyncThunk(
+    "admin/fetchAllProductReviews",
+    async (id, { rejectWithValue }) => {
+        try {
+            const { data } = await axios.get(`/api/v1/admin/reviews?id=${id}`);
+            return data;
+        } catch (error) {
+            const message =
+                error.response?.data?.message ||
+                error.message ||
+                "Failed to fetch all product reviews";
+            return rejectWithValue(message);
+        }
+    }
+);
+
+// ✅ DELETE PRODUCT REVIEW -- ADMIN
+export const deleteProductReview = createAsyncThunk(
+    "admin/deleteProductReview",
+    async ({ id, reviewId }, { rejectWithValue }) => {
+        try {
+            const { data } = await axios.delete(
+                `/api/v1/admin/reviews?id=${reviewId}&productId=${id}`
+            );
+
+            return data
+        } catch (error) {
+            const message =
+                error.response?.data?.message ||
+                error.message ||
+                "Failed to delete product review";
+
+            return rejectWithValue(message);
+        }
+    }
+);
+
+
+
+
+
+
 
 const adminSlice = createSlice({
     name: "admin",
@@ -211,11 +255,12 @@ const adminSlice = createSlice({
         error: null,
         deleteLoading: false,
         users: [],
-        user: [],
+        user: {},
         message: null,
         orders: [],
         totalAmount: 0,
-        order: {}
+        order: {},
+        reviews: []
     },
     reducers: {
         removeErrors: (state) => { state.error = null; },
@@ -399,7 +444,44 @@ const adminSlice = createSlice({
                 state.loading = false;
                 state.error = action.payload || 'Failed to delete order';
                 state.success = null;
+            })
+
+            // FETCH ALL PRODUCT REVIEWS ...ADMIN
+            .addCase(fetchAllProductReviews.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+                state.success = null;
+            })
+            .addCase(fetchAllProductReviews.fulfilled, (state, action) => {
+                state.loading = false;
+                state.reviews = action.payload.reviews || action.payload;
+
+            })
+            .addCase(fetchAllProductReviews.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload || 'Failed to fetch all product reviews';
+                state.success = null;
+            })
+            // ✅ DELETE PRODUCT REVIEW -- ADMIN
+            .addCase(deleteProductReview.pending, (state) => {
+                state.deleteLoading = true;
+                state.error = null;
+                state.success = null;
+            })
+            .addCase(deleteProductReview.fulfilled, (state, action) => {
+                state.deleteLoading = false;
+                state.success = action.payload?.message || 'Review deleted successfully';
+
+                // Optionally remove the deleted review from state.reviews
+                const deletedReviewId = action.meta.arg.reviewId;
+                state.reviews = state.reviews.filter(review => review._id !== deletedReviewId);
+            })
+            .addCase(deleteProductReview.rejected, (state, action) => {
+                state.deleteLoading = false;
+                state.error = action.payload || 'Failed to delete product review';
+                state.success = null;
             });
+
 
 
     }

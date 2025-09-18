@@ -151,40 +151,48 @@ export const getProductReviews = handleAsyncError(async (req, res, next) => {
 
 // ✅ Delete a review
 export const deleteProductReview = handleAsyncError(async (req, res, next) => {
-    const product = await Product.findById(req.query.productId);
+    const { productId, id: reviewId } = req.query;
+
+    // Check if product exists
+    const product = await Product.findById(productId);
 
     if (!product) {
-        return next(new HandleError("Product not found", 400));
+        return next(new HandleError("Product not found", 404));
+    }
+
+    // Check if review exists in product
+    const reviewExists = product.reviews.find(
+        (review) => review._id.toString() === reviewId.toString()
+    );
+
+    if (!reviewExists) {
+        return next(new HandleError("Review not found", 404));
     }
 
     // Filter out the review to delete
     const reviews = product.reviews.filter(
-        r => r._id.toString() !== req.query.id.toString()
+        (review) => review._id.toString() !== reviewId.toString()
     );
 
-    // Recalculate average rating
-    const totalRating = reviews.reduce((sum, r) => sum + r.rating, 0);
-    const ratings = reviews.length > 0 ? totalRating / reviews.length : 0;
+    // Recalculate ratings
+    let ratings = 0;
+    if (reviews.length > 0) {
+        const totalRating = reviews.reduce((sum, r) => sum + r.rating, 0);
+        ratings = totalRating / reviews.length;
+    }
 
-    await Product.findByIdAndUpdate(
-        req.query.productId,
-        {
-            reviews,
-            ratings,
-            numOfReviews: reviews.length,
-        },
-        {
-            new: true,
-            runValidators: true,
-        }
-    );
+    // Update product with new reviews
+    product.reviews = reviews;
+    product.ratings = ratings;
+    product.numOfReviews = reviews.length;
+
+    await product.save({ validateBeforeSave: false });
 
     res.status(200).json({
         success: true,
         message: "Review deleted successfully",
     });
 });
-
 
 // ✅ Update a product
 export const updateProduct = handleAsyncError(async (req, res, next) => {
@@ -238,7 +246,6 @@ export const updateProduct = handleAsyncError(async (req, res, next) => {
     });
 });
 
-
 // ✅ Delete a product
 export const deleteProduct = handleAsyncError(async (req, res, next) => {
     const product = await Product.findByIdAndDelete(req.params.id);
@@ -255,7 +262,6 @@ export const deleteProduct = handleAsyncError(async (req, res, next) => {
         message: "Product deleted successfully",
     });
 });
-
 
 // ✅ Admin: Get all products
 export const getAdminProducts = handleAsyncError(async (req, res, next) => {

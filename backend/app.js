@@ -6,22 +6,44 @@ import transactionRoutes from './routes/transactionRoutes.js';
 import cookieParser from 'cookie-parser';
 import fileUpload from 'express-fileupload';
 import errorHandlerMiddleware from './middleware/error.js';
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Fix for __dirname in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Load environment variables first
+if (process.env.NODE_ENV !== "PRODUCTION") {
+    dotenv.config({ path: path.join(__dirname, 'config', 'config.env') });
+}
 
 const app = express();
 
-// Middleware
-app.use(express.json()); // parse JSON body
-app.use(express.urlencoded({ extended: true })); // parse URL-encoded bodies
+// ---------- Middleware ----------
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(fileUpload());
 
-// Routes
+// ---------- API Routes ----------
 app.use('/api/v1', productRoutes);
 app.use('/api/v1', userRoutes);
 app.use('/api/v1', orderRoutes);
-app.use('/api/v1', transactionRoutes); // M-Pesa transactions
+app.use('/api/v1', transactionRoutes);
 
-// Error handler (last)
+// ---------- Serve Frontend ----------
+const frontendPath = path.join(__dirname, '../frontend/dist');
+app.use(express.static(frontendPath));
+
+// SPA Fallback (React Router support)
+// This avoids matching API routes and prevents path-to-regexp errors
+app.get(/^\/(?!api\/v1).*/, (_, res) => {
+    res.sendFile(path.resolve(frontendPath, 'index.html'));
+});
+
+// ---------- Error Handler ----------
 app.use(errorHandlerMiddleware);
 
 export default app;
