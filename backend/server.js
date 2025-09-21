@@ -1,24 +1,17 @@
-
 import dotenv from 'dotenv';
-dotenv.config({ path: './config/config.env' });// load env first
+dotenv.config({ path: './config/config.env' }); // ✅ load env only once
 
 import app from './app.js';
 import { connectMongoDatabase } from './config/db.js';
 import { v2 as cloudinary } from 'cloudinary';
 
-
-// Load environment variables only in development
-if (process.env.NODE_ENV !== "PRODUCTION") {
-    dotenv.config({ path: "./config/config.env" }); // ✅ correct usage
-}
-
 // Connect to MongoDB
 connectMongoDatabase();
 
-// Handle uncaught exception errors
+// Handle uncaught exceptions (synchronous errors)
 process.on('uncaughtException', (err) => {
-    console.log(`Error: ${err.message}`);
-    console.log(`Server is shutting down due to uncaught exception`);
+    console.error(`Uncaught Exception: ${err.message}`);
+    console.error(`Server shutting down...`);
     process.exit(1);
 });
 
@@ -31,23 +24,21 @@ cloudinary.config({
 
 const port = process.env.PORT || 3000;
 const server = app.listen(port, () => {
-    console.log(`Server is running on Port ${port}`);
+    console.log(`🚀 Server running on port ${port} in ${process.env.NODE_ENV} mode`);
 });
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err) => {
-    console.log(`Error: ${err.message}`);
-    console.log(`Server is shutting down due to unhandled promise rejection`);
-    server.close(() => {
-        process.exit(1);
-    });
+    console.error(`Unhandled Rejection: ${err.message}`);
+    console.error(`Server shutting down...`);
+    server.close(() => process.exit(1));
 });
 
-// Graceful shutdown on SIGTERM
+// Graceful shutdown on SIGTERM (e.g., Heroku/Render signals)
 process.on('SIGTERM', () => {
     console.log('SIGTERM received. Closing server...');
     server.close(() => {
-        console.log('Server closed.');
+        console.log('Server closed gracefully.');
         process.exit(0);
     });
 });
