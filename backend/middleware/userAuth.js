@@ -7,7 +7,7 @@ export const verifyUserAuth = handleAsyncError(async (req, res, next) => {
     const { token } = req.cookies;
 
     if (!token) {
-        return next(new HandleError("Authentication required. Please log in to access this resource.", 401));
+        return next(new HandleError("You need to log in to continue. Please sign in first!s", 401));
     }
 
     const decodedData = jwt.verify(token, process.env.JWT_SECRET_KEY);
