@@ -9,6 +9,8 @@ import { useDispatch, useSelector } from 'react-redux'
 import { clearMessage, deleteOrder, fetchAllOrders, removeErrors, removeSuccess } from '../features/admin/adminSlice'
 import Loader from '../components/Loader'
 import { toast } from 'react-toastify'
+import OrderFound from './OrderFound'
+
 
 function OrdersList() {
     const { orders, loading, error, success, message, deleteLoading } = useSelector(state => state.admin);
@@ -50,11 +52,7 @@ function OrdersList() {
     };
 
     if (orders && orders.length === 0) {
-        return (
-            <div className="no-orders-container">
-                <p>No Order Found</p>
-            </div>
-        )
+        return <OrderFound />   // ✅ use your no-order component
     }
 
     return (

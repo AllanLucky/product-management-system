@@ -8,7 +8,7 @@ import Login from './User/Login';
 import { useDispatch, useSelector } from 'react-redux';
 import { loadUser } from './features/user/userSlice';
 import UserDashboard from './User/UserDashboard';
-import Profile from './User/profile';
+import Profile from './User/Profile';
 import ProtectedRoute from './components/ProtectedRoute';
 import UpdateUserProfile from './User/UpdateUserProfile';
 import UpdatePassword from './User/UpdatePassword';
