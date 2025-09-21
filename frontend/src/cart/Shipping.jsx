@@ -94,7 +94,7 @@ function Shipping() {
             return;
         }
 
-        // Validate phone (should be exactly 10 digits excluding country code)
+        // Validate phone (exclude country code)
         const countryData = Country.getCountryByCode(country);
         let localNumber = phoneNumber;
 
@@ -106,8 +106,10 @@ function Shipping() {
         }
 
         const digitsOnly = localNumber.replace(/\D/g, "");
-        if (digitsOnly.length !== 9) {
-            toast.error("Invalid phone number! It should be exactly 10 digits without country code.", {
+
+        // Kenya: 9 digits; others: 10 digits
+        if ((country === "KE" && digitsOnly.length !== 9) || (country !== "KE" && digitsOnly.length !== 10)) {
+            toast.error("Invalid phone number! It should be exactly 10 digits without country code (9 digits for Kenya).", {
                 position: "top-right",
                 autoClose: 3000,
             });
