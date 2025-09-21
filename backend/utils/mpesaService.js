@@ -57,6 +57,7 @@ export async function generateStkPush(phoneNumber, amount, productName, customDe
             );
         }
 
+        // Format timestamp
         const generateTimestamp = () => {
             const now = new Date();
             const year = now.getFullYear();
@@ -71,15 +72,25 @@ export async function generateStkPush(phoneNumber, amount, productName, customDe
         const timestamp = generateTimestamp();
         const password = Buffer.from(shortcode + passkey + timestamp).toString('base64');
 
+        // Format phone number: remove + or spaces
+        const formattedPhoneNumber = phoneNumber.replace(/\D/g, "");
+
+        // Validate local number length for Kenya (should be 12 digits including country code 254)
+        if (!/^2547\d{8}$/.test(formattedPhoneNumber)) {
+            throw new Error(
+                "Invalid phone number! Use format 2547XXXXXXXX for Kenya."
+            );
+        }
+
         const requestBody = {
             BusinessShortCode: shortcode,
             Password: password,
             Timestamp: timestamp,
             TransactionType: "CustomerPayBillOnline",
             Amount: amount,
-            PartyA: phoneNumber,
+            PartyA: formattedPhoneNumber,
             PartyB: shortcode,
-            PhoneNumber: phoneNumber,
+            PhoneNumber: formattedPhoneNumber,
             CallBackURL: callbackUrl,
             AccountReference: productName,
             TransactionDesc: customDesc || `Payment of KES ${amount} for ${productName}`,
@@ -98,8 +109,9 @@ export async function generateStkPush(phoneNumber, amount, productName, customDe
         );
 
         if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
             throw new Error(
-                "Your M-Pesa transaction request could not be processed. Please check your details and try again."
+                errorData?.errorMessage || "Your M-Pesa transaction could not be processed. Please check your details and try again."
             );
         }
 
