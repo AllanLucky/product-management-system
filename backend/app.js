@@ -33,15 +33,13 @@ app.use('/api/v1', userRoutes);
 app.use('/api/v1', orderRoutes);
 app.use('/api/v1', transactionRoutes);
 
-// ---------- Serve Frontend (Vite build) ----------
+// ---------- Serve Frontend ----------
 const frontendPath = path.join(__dirname, '../frontend/dist');
 app.use(express.static(frontendPath));
 
-// SPA fallback: only non-API routes should go to index.html
-app.get('*', (req, res, next) => {
-    if (req.path.startsWith('/api')) {
-        return next(); // let API routes continue
-    }
+// SPA Fallback (React Router support)
+// This avoids matching API routes and prevents path-to-regexp errors
+app.get(/^\/(?!api\/v1).*/, (_, res) => {
     res.sendFile(path.resolve(frontendPath, 'index.html'));
 });
 
