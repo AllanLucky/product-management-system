@@ -17,6 +17,8 @@
     display: flex;
     flex-direction: column;
     gap: 20px;
+    overflow-x: auto;
+    /* allow horizontal scroll on small screens */
 }
 
 .confirm-table {
@@ -26,6 +28,8 @@
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    min-width: 600px;
+    /* prevents squishing on tablets */
 }
 
 .confirm-table caption {
@@ -78,23 +82,87 @@
     background-color: var(--bg-secondary);
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-    .confirm-table-container {
-        gap: 15px;
+/* =========================
+   Responsive Design
+========================= */
+
+/* Tablets (≤ 1024px) */
+@media (max-width: 1024px) {
+    .confirm-table {
+        min-width: 500px;
+    }
+
+    .confirm-table th,
+    .confirm-table td {
+        padding: 10px;
+        font-size: 0.85rem;
     }
 
     .confirm-table caption {
         font-size: 1rem;
     }
 
+    .proceed-button {
+        padding: 11px 28px;
+        font-size: 0.95rem;
+    }
+}
+
+/* Mobile (≤ 768px) */
+@media (max-width: 768px) {
+    .confirm-table-container {
+        gap: 15px;
+    }
+
+    .confirm-table {
+        min-width: 100%;
+        /* allow table to fit screen width */
+    }
+
     .confirm-table th,
     .confirm-table td {
         font-size: 0.8rem;
+        padding: 8px;
+    }
+
+    .confirm-table caption {
+        font-size: 0.9rem;
     }
 
     .proceed-button {
         padding: 10px 25px;
         font-size: 0.9rem;
+    }
+
+    .order-product-image {
+        width: 40px;
+        height: 40px;
+    }
+}
+
+/* Small Mobile (≤ 480px) */
+@media (max-width: 480px) {
+    .confirm-header {
+        font-size: 1.5rem;
+    }
+
+    .confirm-table th,
+    .confirm-table td {
+        font-size: 0.75rem;
+        padding: 6px;
+    }
+
+    .confirm-table caption {
+        font-size: 0.85rem;
+    }
+
+    .proceed-button {
+        padding: 8px 20px;
+        font-size: 0.85rem;
+    }
+
+    .order-product-image {
+        width: 35px;
+        height: 35px;
     }
 }
