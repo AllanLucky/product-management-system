@@ -6,7 +6,7 @@ import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
-import "../pageStyles/search.css";
+import "../pageStyles/Search.css";
 import { useSelector } from "react-redux";
 
 function Navbar() {
