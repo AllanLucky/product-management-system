@@ -31,6 +31,8 @@ import UpdateRole from './Admin/UpdateRole';
 import OrdersList from './Admin/OrdersList';
 import UpdateOrderStatus from './Admin/UpdateOrderStatus';
 import ReviewsList from './Admin/ReviewsList';
+import AboutUs from './pages/AboutUs';
+import ContactUs from './pages/ContactUs';
 
 function App() {
   const { isAuthenticated, user } = useSelector((state) => state.user);
@@ -59,6 +61,9 @@ function App() {
         <Route path="/password/forgot" element={<ForgotPassword />} />
         <Route path="/reset/:token" element={<ResetPassword />} />
         <Route path="/cart" element={<Cart />} />
+        <Route path="/about-us" element={<AboutUs />} />
+        <Route path="/contact-us" element={<ContactUs />} />
+
 
         {/* Protected routes */}
         <Route path="/shipping" element={<ProtectedRoute element={<Shipping />} />} />

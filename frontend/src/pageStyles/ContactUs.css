@@ -1,0 +1,131 @@
+/* General Container */
+.contact-container {
+    padding: 40px;
+    font-family: Arial, sans-serif;
+    color: #333;
+    margin-top: 100px;
+}
+
+/* Hero Section */
+.contact-hero {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.contact-hero h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    color: #007bff;
+}
+
+.contact-hero p {
+    font-size: 1.2rem;
+    color: #555;
+}
+
+/* Contact Info + Form */
+.contact-content {
+    display: flex;
+    justify-content: space-between;
+    gap: 40px;
+    margin-bottom: 40px;
+}
+
+.contact-info,
+.contact-form {
+    flex: 1;
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.contact-info h2,
+.contact-form h2 {
+    margin-bottom: 15px;
+    color: #007bff;
+}
+
+.contact-form input,
+.contact-form textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+}
+
+.contact-form button {
+    background: #007bff;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background 0.3s;
+}
+
+.contact-form button:hover {
+    background: #0056b3;
+}
+
+/* Map Section */
+.contact-map {
+    margin-top: 40px;
+    text-align: center;
+}
+
+.contact-map h2 {
+    margin-bottom: 20px;
+    color: #007bff;
+}
+
+.contact-map iframe {
+    width: 100%;
+    height: 350px;
+    border: 0;
+    border-radius: 10px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* ---------------------------
+   ✅ Responsive Media Queries
+---------------------------- */
+
+/* Tablets */
+@media (max-width: 992px) {
+    .contact-content {
+        flex-direction: column;
+        gap: 20px;
+    }
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+    .contact-container {
+        padding: 20px;
+    }
+
+    .contact-hero h1 {
+        font-size: 2rem;
+    }
+
+    .contact-hero p {
+        font-size: 1rem;
+    }
+
+    .contact-info,
+    .contact-form {
+        padding: 15px;
+    }
+
+    .contact-form button {
+        width: 100%;
+    }
+
+    /* ✅ Make map smaller on mobile */
+    .contact-map iframe {
+        height: 250px;
+    }
+}
