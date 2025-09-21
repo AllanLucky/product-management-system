@@ -106,7 +106,7 @@ function Shipping() {
         }
 
         const digitsOnly = localNumber.replace(/\D/g, "");
-        if (digitsOnly.length !== 10) {
+        if (digitsOnly.length !== 9) {
             toast.error("Invalid phone number! It should be exactly 10 digits without country code.", {
                 position: "top-right",
                 autoClose: 3000,
