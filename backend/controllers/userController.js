@@ -221,20 +221,20 @@ export const updatePassword = handleAsyncError(async (req, res, next) => {
     sendToken(user, 200, res);
 });
 
-/**
- * @desc    Update profile
- * @route   PUT /api/v1/me/update
- * @access  Private
- */
 export const updateProfile = handleAsyncError(async (req, res, next) => {
     const { name, email, avatar } = req.body;
     const updateUserDetails = { name, email };
 
-    if (avatar !== "") {
+    // Only handle avatar if it is provided and is not empty
+    if (avatar && avatar.trim() !== "") {
         const userData = await User.findById(req.user.id);
-        const imageId = userData.avatar.public_id;
-        await cloudinary.uploader.destroy(imageId);
 
+        // Delete old image safely
+        if (userData.avatar?.public_id) {
+            await cloudinary.uploader.destroy(userData.avatar.public_id);
+        }
+
+        // Upload new image
         const myCloud = await cloudinary.uploader.upload(avatar, {
             folder: "avatars",
             width: 150,
@@ -258,6 +258,7 @@ export const updateProfile = handleAsyncError(async (req, res, next) => {
         user,
     });
 });
+
 
 /**
  * @desc    Admin: Get all users

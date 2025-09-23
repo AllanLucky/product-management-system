@@ -3,7 +3,8 @@ import '../UserStyles/Profile.css';
 import { Link } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import PageTitle from "../components/PageTitle";
-import { removeSuccess } from "../features/user/userSlice"; // your slice action
+import { removeSuccess } from "../features/user/userSlice";
+import { toast } from "react-toastify";
 
 function Profile() {
     const dispatch = useDispatch();
@@ -12,7 +13,15 @@ function Profile() {
     // Reset previous success/messages on mount
     useEffect(() => {
         dispatch(removeSuccess());
-    }, [dispatch]);
+
+        // Guard: if no avatar, show a warning
+        if (!user?.avatar?.url) {
+            toast.warning("You have not uploaded a profile image!", {
+                position: "top-right",
+                autoClose: 3000,
+            });
+        }
+    }, [dispatch, user]);
 
     return (
         <div className="profile-container">
