@@ -31,11 +31,12 @@ const userSchema = new mongoose.Schema(
         avatar: {
             public_id: {
                 type: String,
-                required: true
+                default: "default_avatar", // ✅ Default placeholder
             },
             url: {
                 type: String,
-                required: true
+                default: "https://res.cloudinary.com/demo/image/upload/v1692000000/default_avatar.png"
+                // 👆 put your hosted default image URL
             }
         },
         role: {
@@ -51,17 +52,16 @@ const userSchema = new mongoose.Schema(
     }
 );
 
-// Hash password before save
+// 🔐 Hash password before save
 userSchema.pre("save", async function (next) {
-    if (!this.isModified("password"))
-        return next();
+    if (!this.isModified("password")) return next();
 
     const salt = await bcryptjs.genSalt(10);
     this.password = await bcryptjs.hash(this.password, salt);
     next();
 });
 
-// Generate JWT
+// 🔑 Generate JWT
 userSchema.methods.getJWTToken = function () {
     return jwt.sign(
         { id: this._id, role: this.role },
@@ -70,12 +70,12 @@ userSchema.methods.getJWTToken = function () {
     );
 };
 
-// Compare password
+// 🔐 Compare password
 userSchema.methods.comparePassword = async function (enteredPassword) {
     return await bcryptjs.compare(enteredPassword, this.password);
 };
 
-// Generate password reset token
+// 🔄 Generate password reset token
 userSchema.methods.generatePasswordResetToken = function () {
     const resetToken = crypto.randomBytes(20).toString("hex");
 
