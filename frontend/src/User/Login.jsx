@@ -15,6 +15,11 @@ function Login() {
     const location = useLocation();
     const redirectParam = new URLSearchParams(location.search).get("redirect") || "/";
 
+    // ✅ Reset form when component mounts
+    useEffect(() => {
+        setFormData({ email: '', password: '' });
+    }, []);
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prevData) => ({ ...prevData, [name]: value }));
@@ -57,9 +62,10 @@ function Login() {
                 autoClose: 3000
             });
 
+            // ✅ Reset form before redirect
             setFormData({ email: '', password: '' });
-            navigate(redirectParam);
             setLoginAttempted(false);
+            navigate(redirectParam);
         }
     }, [error, isAuthenticated, loginAttempted, dispatch, navigate, redirectParam]);
 
@@ -93,7 +99,7 @@ function Login() {
                         {loading ? 'Logging in...' : 'Login'}
                     </button>
                     <p className="form-links">
-                        Forgot your password? <Link to="/password/forgot">Reset Here</Link>
+                        Forgot you password? <Link to="/password/forgot">Reset Here</Link>
                     </p>
                     <p className="form-links">
                         You don’t have an account? <Link to="/register">Register</Link>
