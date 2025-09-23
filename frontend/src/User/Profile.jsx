@@ -30,10 +30,9 @@ function Profile() {
             <Navbar />
 
             <div className="profile-container">
-                <div className="profile-header">
+                {/* <div className="profile-header">
                     <h1 className="profile-heading">{user?.name || "User"}'s Profile</h1>
-                </div>
-
+                </div> */}
                 <div className="profile-content">
                     <div className="profile-image">
                         <img
