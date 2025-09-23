@@ -14,11 +14,11 @@ import crypto from "crypto";
 export const registerUser = handleAsyncError(async (req, res) => {
     const { name, email, password, avatar, role } = req.body;
 
-    const myCloud = await cloudinary.uploader.upload(avatar, {
-        folder: "avatars",
-        width: 150,
-        crop: "scale",
-    });
+    // const myCloud = await cloudinary.uploader.upload(avatar, {
+    //     folder: "avatars",
+    //     width: 150,
+    //     crop: "scale",
+    // });
 
     if (!name || !email || !password) {
         return res.status(400).json({
@@ -41,10 +41,10 @@ export const registerUser = handleAsyncError(async (req, res) => {
         name,
         email,
         password,
-        avatar: {
-            public_id: myCloud.public_id,
-            url: myCloud.secure_url,
-        },
+        // avatar: {
+        //     public_id: myCloud.public_id,
+        //     url: myCloud.secure_url,
+        // },
         role: role || "user", // ✅ Default role is "user"
     });
 
