@@ -73,8 +73,8 @@ function Register() {
         }
     }, [dispatch, success, navigate, submitAttempted]);
 
-    <>
-        return (
+
+    return (
         <div className='form-container container'>
             <div className="form-content">
                 <form className="form" onSubmit={registerSubmit}>
@@ -132,8 +132,8 @@ function Register() {
                 </form>
             </div>
         </div>
-        )
-    </>
+    )
+
 }
 
 export default Register
