@@ -118,6 +118,15 @@ function Shipping() {
 
         dispatch(saveShippingInfo({ address, pinCode, phoneNumber, country, state, city }));
         navigate("/order/confirm");
+        // ✅ reset form fields after submit
+        setAddress("");
+        setPinCode("");
+        setPhoneNumber("");
+        setCountry("");
+        setState("");
+        setCity("");
+        setStates([]);
+        setCities([]);
     };
 
     return (

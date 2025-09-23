@@ -7,8 +7,8 @@ import { registerUser, removeErrors, removeSuccess } from '../features/user/user
 
 function Register() {
     const [user, setUser] = useState({ name: "", email: "", password: "" })
-    const [avatar, setAvatar] = useState("");
-    const [avatarPreview, setAvatarPreview] = useState('./images/profile.jpg')
+    // const [avatar, setAvatar] = useState("");
+    // const [avatarPreview, setAvatarPreview] = useState('./images/profile.jpg')
     const [loading, setLoading] = useState(false);
     const [submitAttempted, setSubmitAttempted] = useState(false); // <-- track fresh submit
 
@@ -23,8 +23,8 @@ function Register() {
             const reader = new FileReader();
             reader.onload = () => {
                 if (reader.readyState === 2) {
-                    setAvatarPreview(reader.result)
-                    setAvatar(reader.result)
+                    // setAvatarPreview(reader.result)
+                    // setAvatar(reader.result)
                 }
             }
             reader.readAsDataURL(e.target.files[0]);
@@ -47,7 +47,7 @@ function Register() {
         myForm.set('name', name)
         myForm.set('email', email)
         myForm.set('password', password)
-        myForm.set('avatar', avatar)
+        // myForm.set('avatar', avatar)
 
         setLoading(true);
         setSubmitAttempted(true); // mark that user just submitted
@@ -106,6 +106,7 @@ function Register() {
                         />
                     </div>
                     <div className="input-group avatar-group">
+                        {/* 
                         <input
                             type='file'
                             name='avatar'
@@ -113,9 +114,12 @@ function Register() {
                             accept='image/*'
                             onChange={registerData}
                         />
-                        <img src={avatarPreview}
+                        <img 
+                            src={avatarPreview}
                             alt="avatar Preview"
-                            className='avatar' />
+                            className='avatar' 
+                        /> 
+                        */}
                     </div>
                     <button className="authBtn"
                         disabled={loading}>
