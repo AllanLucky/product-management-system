@@ -31,7 +31,7 @@ function Home() {
                 <Loader /> // Capitalized usage
             ) : (
                 <>
-                    <PageTitle title="Home-PrimeBrandshop" />
+                    <PageTitle title="PrimeBrandshop" />
                     <Navbar />
 
                     <main className="home-container">
